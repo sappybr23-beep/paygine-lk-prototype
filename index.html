@@ -1,0 +1,2147 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Личный кабинет Paygine</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+  /* Desktop: left nav rail + centered 608 column. Mobile (<=900): iPhone status bar + full-width stacked layout + floating tab bar, drawer via ☰. Committed light theme (brand UI). */
+  :root{
+    --ink:#282828; --ink2:#151616;
+    --muted:#adb3b6; --ans:#8b9296;
+    --line:#e0e0e0; --card:#f5f5f5; --field:#f7f7f8;
+    --active:#f1f1f1; --hover:#f5f5f5; --accent:#37e6e9; --danger:#e5484d;
+    --bg:#ffffff; color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Onest",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;letter-spacing:-0.01em;
+  }
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+  .app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100%}
+  .app.collapsed{grid-template-columns:80px minmax(0,1fr)}
+
+  /* Screen router */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* Sidebar collapse */
+  .sidebar-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-right:4px}
+  .collapse-toggle{background:none;border:0;cursor:pointer;color:var(--muted);display:grid;place-items:center;width:32px;height:32px;flex-shrink:0}
+  .collapse-toggle:hover{color:var(--ink)}
+  .nav .label{white-space:nowrap;overflow:hidden}
+  .app.collapsed .logo{display:none}
+  .app.collapsed .sidebar-top{justify-content:center}
+  .app.collapsed .nav{justify-content:center;padding-left:0;padding-right:0}
+  .app.collapsed .nav .label{display:none}
+  .app.collapsed .nav.active{background:none}
+  .app.collapsed .nav.active .ic{background:var(--active);border-radius:8px}
+
+  /* ===== Главная (home) ===== */
+  .home-col{max-width:960px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:24px;padding:24px 0 108px}
+  .home-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:16px}
+  .home-head .title-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+  .home-title{font-size:32px;font-weight:600;line-height:1.2;margin:0}
+  .home-actions{display:flex;align-items:center;gap:22px;flex-shrink:0}
+  .report-btn{display:inline-flex;align-items:center;gap:8px;background:none;border:0;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
+  .icon-btn{background:none;border:0;cursor:pointer;color:var(--ink);display:grid;place-items:center;width:28px;height:28px;position:relative;flex-shrink:0}
+  .icon-btn .dot{position:absolute;top:-1px;right:-1px;width:8px;height:8px;border-radius:50%;background:#ff3b30;border:1.5px solid #fff}
+  .filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:0;border-radius:999px;padding:8px 14px;font-size:14px;color:var(--ans);cursor:pointer;line-height:1}
+  .chip b{color:var(--ink);font-weight:600}
+  .chip .chev{color:var(--muted)}
+  .updated{margin-left:auto;display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;white-space:nowrap}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
+  .widget{background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;position:relative;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .widget-title{font-size:16px;font-weight:600;color:var(--ink)}
+  .metric-label{display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:600;color:var(--ink);white-space:nowrap;line-height:20px}
+  .metric-label .q{color:var(--muted);display:inline-flex;align-items:center;flex:none;width:16px;height:16px}
+  .metric-label .q svg{width:16px;height:16px;display:block}
+  .metric-value{font-size:28px;font-weight:700;letter-spacing:-0.01em;display:flex;align-items:baseline;gap:4px}
+  .metric-value .cur{font-size:20px;color:var(--muted);font-weight:600}
+  .widget-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .chart-img{width:100%;height:auto;display:block}
+  /* Быстрый заказ */
+  .qorder{gap:16px}
+  .qorder-body{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+  .qorder-amt{font-size:40px;font-weight:700;letter-spacing:-0.02em}
+  .qorder-num{font-size:15px;color:var(--ink);font-weight:500}
+  .qorder-desc{font-size:15px;color:var(--ink)}
+  .qorder-btn{margin-top:16px;height:48px;border:0;border-radius:8px;background:var(--card);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer}
+  .qorder-btn:hover{background:#efefef}
+  .qorder-btn .m-label{display:none}
+  /* Segment control шт/₽ */
+  .seg{display:inline-flex;background:var(--card);border-radius:999px;padding:3px;flex-shrink:0}
+  .seg button{border:0;background:none;padding:5px 15px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+  /* trash (edit mode) */
+  .trash{display:none;position:absolute;top:20px;right:20px;width:36px;height:36px;border:0;border-radius:8px;background:#fde8e8;color:var(--danger);cursor:pointer;align-items:center;justify-content:center}
+  body.editing .trash{display:inline-flex}
+  .widget.removed{display:none}
+  /* dark banner */
+  .home-banner{position:fixed;bottom:24px;left:220px;right:0;margin:0 auto;max-width:582px;z-index:20;background:#282828;color:#fff;border-radius:12px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+  .app.collapsed .home-banner{left:80px}
+  .home-banner .bl{display:inline-flex;align-items:center;gap:12px;font-size:15px;font-weight:500}
+  /* Add-widget panel */
+  .addwidget{position:fixed;top:0;right:0;bottom:0;width:320px;background:#fff;border-left:1px solid var(--line);z-index:70;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;gap:20px;padding:24px;overflow:auto}
+  body.editing .addwidget{transform:none;box-shadow:-8px 0 30px rgba(0,0,0,.1)}
+  .aw-head{display:flex;align-items:center;justify-content:space-between}
+  .aw-head h3{margin:0;font-size:22px;font-weight:600}
+  .aw-card{border:1px solid #eee;border-radius:16px;padding:14px;cursor:pointer;background:#fff}
+  .aw-card:hover{border-color:var(--accent)}
+  .aw-prev{background:#fafafa;border-radius:10px;padding:10px;font-size:11px;color:var(--ink);overflow:hidden}
+  .aw-prev img{width:100%;height:auto;display:block;border-radius:4px}
+  .aw-name{font-size:16px;font-weight:600;margin-top:12px}
+  .aw-desc{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.4}
+
+  /* Sidebar (desktop rail / mobile drawer) */
+  .sidebar{
+    background:#fff;border-right:1px solid var(--line);
+    padding:24px 12px;display:flex;flex-direction:column;gap:20px;
+    position:sticky;top:0;align-self:start;height:100vh;overflow:auto;z-index:60;
+  }
+  .logo{width:118px;height:32px;margin:9px 0 0 16px;display:block;flex-shrink:0}
+  .nav-list{display:flex;flex-direction:column;gap:4px;flex:1 1 auto}
+  .nav-bottom{display:flex;flex-direction:column;gap:4px;margin-top:auto}
+  .nav{
+    display:flex;align-items:center;gap:12px;padding:12px 20px 12px 16px;border-radius:6px;
+    color:var(--ink);font-size:16px;font-weight:500;line-height:20px;
+    background:none;border:0;cursor:pointer;text-align:left;width:100%;text-decoration:none;
+  }
+  .nav:hover{background:var(--hover)}
+  .nav.active{background:var(--active)}
+  .ic{width:24px;height:24px;flex-shrink:0;color:var(--ink);display:grid;place-items:center}
+  .ic svg{display:block;width:24px;height:24px}
+
+  /* Status bar (mobile only) */
+  .statusbar{display:none}
+
+  /* Content column */
+  .content{padding:0 24px 48px}
+  .col{max-width:608px;margin:0 auto;display:flex;flex-direction:column}
+  .page-title{font-size:32px;font-weight:600;line-height:1.25;margin:0;padding:40px 0 8px;text-wrap:balance}
+  .main{display:flex;flex-direction:column;gap:64px;padding-block:32px 8px}
+  .h28{font-size:28px;font-weight:600;line-height:1.4;margin:0}
+
+  .contacts-label{display:none}
+  .contacts{display:flex;justify-content:space-between;gap:16px 40px;flex-wrap:wrap}
+  .contacts span{font-size:30px;font-weight:600;line-height:1.4;white-space:nowrap}
+
+  .faq{display:flex;flex-direction:column;gap:23px}
+  .accordion{display:flex;flex-direction:column}
+  .item{border-bottom:1px solid var(--line)}
+  .q{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;
+    background:none;border:0;padding:24px 0;cursor:pointer;text-align:left;color:var(--ink);
+    font-size:20px;font-weight:600;line-height:1.25;
+  }
+  .chev{flex-shrink:0;transition:transform .22s ease}
+  .item.open .chev{transform:rotate(180deg)}
+  .a{overflow:hidden;max-height:0;transition:max-height .28s ease;color:var(--ans);font-size:15px;line-height:1.5;font-weight:400;white-space:pre-line}
+  .a > div{padding:0 0 24px}
+
+  .cards{display:flex;flex-direction:column;gap:24px}
+  .card{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    background:var(--card);border-radius:4px;padding:24px;cursor:default;
+    color:var(--ink);font-size:20px;font-weight:600;line-height:1.25;
+    text-decoration:none;border:0;text-align:left;width:100%;
+  }
+  .card:hover{background:#efefef}
+  .card .ic{font-size:20px}
+
+  /* Ask banner */
+  .ask{
+    background:#fff;background-image:linear-gradient(90deg,#ffffff,#f2f6f6);
+    box-shadow:0 6px 17px rgba(0,0,0,.08);border-radius:4px;
+    padding:32px;display:flex;flex-direction:column;gap:24px;
+  }
+  .ask h2{font-size:28px;font-weight:600;line-height:1.4;margin:0;text-wrap:balance}
+  .form{display:flex;flex-direction:column;gap:16px}
+  .field{background:var(--field);border-radius:4px;padding:16px;display:flex;box-shadow:inset 0 0 0 1px transparent;transition:box-shadow .15s ease}
+  .field.error{box-shadow:inset 0 0 0 1px var(--danger)}
+  .field textarea{
+    width:100%;min-height:16px;border:0;background:transparent;resize:none;outline:none;
+    font-family:inherit;font-size:15px;line-height:20px;color:var(--ink);letter-spacing:-0.01em;
+    overflow:hidden;display:block;padding:0;margin:0;
+  }
+  .field textarea::placeholder{color:var(--muted)}
+  .err{display:none;color:var(--danger);font-size:13px;line-height:1;margin:-8px 2px 0}
+  .field.error ~ .err{display:block}
+  .submit{
+    background:var(--ink);color:#fff;border:0;border-radius:4px;height:48px;padding:0 20px;
+    font-size:15px;font-weight:600;line-height:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:opacity .15s ease;
+  }
+  .submit:hover{opacity:.9}
+  .sent{display:none;flex-direction:column;gap:16px}
+  .ask.done .form{display:none}
+  .ask.done h2{display:none}
+  .ask.done .sent{display:flex}
+  .sent p{margin:0;color:var(--ans);font-size:15px;line-height:1.5}
+  .again{align-self:flex-start;background:none;border:0;padding:0;cursor:pointer;color:var(--ink);font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+  /* Tab bar + mobile menu (mobile only) */
+  .tabbar{display:none}
+  .overlay{display:none}
+  .menusheet{display:none}
+  .menu-scrim{display:none}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:minmax(0,1fr)}
+
+    /* sidebar becomes drawer */
+    .sidebar{
+      position:fixed;inset:0 auto 0 0;width:min(84vw,300px);height:100%;
+      transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.18);
+    }
+    .sidebar.open{transform:none}
+    .overlay.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:55}
+
+    .content{padding:0 0 124px;grid-column:1}
+
+    /* status bar */
+    .statusbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 22px 6px;padding-top:calc(14px + env(safe-area-inset-top,0px));
+      position:sticky;top:0;background:var(--bg);z-index:30;
+    }
+    .sb-time{font-size:16px;font-weight:600;letter-spacing:0;min-width:54px}
+    .sb-notch{width:112px;height:30px;background:#000;border-radius:20px}
+    .sb-icons{display:flex;align-items:center;gap:7px;min-width:54px;justify-content:flex-end;color:#000}
+
+    .col{max-width:none}
+    .page-title{font-size:28px;line-height:36px;padding:16px 24px 0}
+    .main{gap:0;padding-block:0}
+    .main > *{padding:24px}
+    .contacts-block{display:flex;flex-direction:column;gap:23px}
+    .contacts-label{display:block;font-size:24px;font-weight:600;line-height:40px}
+    .contacts{flex-direction:column;gap:16px}
+    .contacts span{font-size:30px;font-weight:500;line-height:40px;white-space:normal;overflow-wrap:anywhere}
+    .h28{font-size:24px;line-height:40px}
+    .q{padding:16px 0;font-size:16px;line-height:24px}
+    .card{font-size:20px}
+    .main > .ask{margin:24px;padding:32px;background-image:none;border-radius:4px;box-shadow:0 6px 20px rgba(0,0,0,.10)}
+    .ask h2{font-size:28px;line-height:40px}
+
+    /* floating tab bar */
+    .tabbar{
+      display:flex;gap:10px;align-items:stretch;
+      position:fixed;left:0;right:0;bottom:0;z-index:40;
+      padding:14px 24px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));
+      background:linear-gradient(to top,var(--bg) 68%,rgba(255,255,255,0));
+      pointer-events:none;
+    }
+    .tab-pill{
+      flex:1 1 auto;display:flex;background:#fff;border-radius:72px;padding:4px;
+      box-shadow:0 0 14px rgba(0,0,0,.08);pointer-events:auto;
+    }
+    .tab{
+      flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:2px;padding:8px 4px;border:0;background:none;cursor:pointer;border-radius:53px;color:var(--muted);
+    }
+    .tab.active{background:var(--field);color:var(--ink2)}
+    .tab .ic{color:inherit;width:24px;height:24px}
+    .tab span{font-family:"Inter",system-ui,sans-serif;font-size:11px;font-weight:500;line-height:16px;letter-spacing:0}
+    .tab-menu{
+      flex:0 0 56px;width:56px;display:flex;align-items:center;justify-content:center;
+      background:#fff;border-radius:72px;box-shadow:0 0 14px rgba(0,0,0,.08);
+      border:0;cursor:pointer;color:var(--muted);pointer-events:auto;
+    }
+    .tab-menu .ic{color:inherit}
+
+    /* Menu popup (☰) */
+    body.menu-open .tabbar{display:none}
+    .menu-scrim{display:none}
+    .menu-scrim.open{display:block;position:fixed;inset:0;background:transparent;z-index:58}
+    .menusheet{display:none}
+    .menusheet.open{
+      display:flex;align-items:flex-end;gap:8px;
+      position:fixed;left:0;right:0;bottom:0;z-index:60;
+      padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+      pointer-events:none;
+    }
+    .menusheet.open > *{pointer-events:auto}
+    .menu-card{
+      flex:1 1 auto;min-width:0;padding:4px;display:flex;flex-direction:column;gap:4px;
+      border:1px solid rgba(0,0,0,.07);border-radius:28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.72));
+      -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+      box-shadow:0 0 8px rgba(0,0,0,.06);
+    }
+    .menu-logo{height:48px;display:flex;align-items:center;justify-content:center}
+    .menu-logo svg{width:118px;height:32px;display:block}
+    .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 0}
+    .menu-item{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+      height:61px;border-radius:53px;color:rgba(40,40,40,.4);
+      background:none;border:0;cursor:pointer;padding:4px;
+      font-family:"Onest",system-ui,sans-serif;
+    }
+    .menu-item .ic{width:24px;height:24px;color:inherit}
+    .menu-item span{font-size:11px;font-weight:600;line-height:16px;text-align:center;letter-spacing:-0.01em}
+    .menu-item.active{background:#eeeeee;color:#282828}
+    .menu-close{
+      flex:0 0 auto;align-self:flex-end;display:flex;align-items:center;justify-content:center;cursor:pointer;
+      padding:16px;border-radius:72px;color:rgba(40,40,40,.4);border:0;
+      background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+      outline:1px solid rgba(0,0,0,.07);outline-offset:-1px;box-shadow:0 0 8px rgba(0,0,0,.06);
+    }
+    .menu-close .ic{width:24px;height:24px;color:inherit}
+
+    /* home mobile */
+    .home-col{max-width:none;gap:16px;padding:8px 24px 96px}
+    .home-head{padding-top:8px}
+    .home-title{font-size:28px}
+    .home-actions{gap:16px}
+    .report-btn{padding:0}
+    .report-btn .rl{display:none}
+    .grid{grid-template-columns:1fr;gap:16px}
+    .widget{padding:24px}
+    .widget .chart-img{margin-top:4px}
+    .qorder-amt{margin-top:16px}
+    .qorder-btn{background:var(--ink);color:#fff}
+    .qorder-btn:hover{background:#000}
+    .qorder-btn .d-label{display:none}
+    .qorder-btn .m-label{display:inline}
+    .home-banner{left:24px;right:24px;max-width:none;margin:0;bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:41}
+    .updated{font-size:12px}
+    .addwidget{width:100%}
+  }
+
+  /* ===== Новый заказ (order) ===== */
+  #screen-order .order{padding:24px;position:relative}
+  .order-titles{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:2px 0 6px}
+  .order-h1{font-size:32px;font-weight:600;line-height:40px;color:var(--ink)}
+  .order-sub{display:inline-flex;align-items:center;gap:8px;font-size:32px;font-weight:600;line-height:40px;color:var(--muted)}
+  .order-sub svg{flex-shrink:0;color:var(--muted)}
+  .order-seg{display:inline-flex;align-items:center;gap:4px;width:196px;background:var(--field);border:0;border-radius:20px;padding:8px 12px 8px 16px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:500;line-height:20px}
+  .order-seg .l{color:var(--muted);flex-shrink:0}
+  .order-seg b{color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .order-seg svg{color:var(--muted);flex-shrink:0;margin-left:auto}
+
+  .ofield{display:flex;align-items:center;gap:8px;background:var(--field);border-radius:4px;min-height:48px;padding:14px 16px;font-size:15px;line-height:20px;color:var(--muted)}
+  .ofield input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:inherit;font-size:15px;line-height:20px;color:var(--ink);letter-spacing:-.01em;padding:0}
+  .ofield input::placeholder{color:var(--muted)}
+  .ofield.select{justify-content:space-between;cursor:pointer;color:var(--muted)}
+  .ofield.select .chev{color:var(--muted);flex-shrink:0;width:20px;height:20px}
+
+  .order-submit{display:flex;align-items:center;justify-content:center;background:var(--ink2);color:#fff;border:0;border-radius:4px;padding:16px 24px;font-family:inherit;font-size:15px;font-weight:600;line-height:16px;cursor:pointer}
+  .order-submit:hover{opacity:.92}
+
+  /* toggle */
+  .toggle{flex-shrink:0;width:40px;height:20px;border-radius:20px;background:#d9dcde;border:0;cursor:pointer;position:relative;padding:0;transition:background .15s}
+  .toggle::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .toggle.on{background:var(--ink)}
+  .toggle.on::after{left:22px}
+  /* stepper */
+  .stepper{display:inline-flex;align-items:center;gap:8px;flex-shrink:0}
+  .stepper button{width:20px;height:20px;border:0;background:none;cursor:pointer;display:grid;place-items:center;padding:0;color:var(--ink)}
+  .stepper .minus{color:#ced0d4}
+  .stepper .val{min-width:20px;text-align:center;font-size:16px;font-weight:500;line-height:20px;color:#191A23}
+
+  /* ---- empty state ---- */
+  .order-empty{display:flex;flex-direction:column;gap:24px}
+  .order-topwrap{max-width:608px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  .oe-card{width:608px;max-width:100%;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+  .oe-amount{display:flex;align-items:baseline;gap:10px;padding:40px 0;font-size:44px;font-weight:600;line-height:44px;letter-spacing:-.01em;color:var(--ink2)}
+  .oe-amount-in{border:0;background:none;outline:none;font:inherit;letter-spacing:inherit;color:var(--ink2);padding:0;field-sizing:content;min-width:0;max-width:100%}
+  .oe-amount-in::placeholder{color:var(--muted)}
+  .oe-rub{flex-shrink:0;color:var(--ink2)}
+  .oe-amount-in:placeholder-shown + .oe-rub{display:none}
+  .oe-fields{display:flex;flex-direction:column;gap:16px}
+  .order-empty .order-submit{width:608px;max-width:100%;margin:0 auto}
+
+  /* ---- full state ---- */
+  .order-full{display:none}
+  .order.has-items .order-empty{display:none}
+  .order.has-items .order-full{display:block}
+  .order-full .order-topwrap{max-width:none;margin-bottom:24px}
+  .order-cols{display:grid;grid-template-columns:384px minmax(0,1fr)}
+  .order-left{border-right:1px solid #E8ECEE;padding:0 24px 24px 0;display:flex;flex-direction:column;gap:16px}
+  .ol-h{font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .order-left .heading{padding-bottom:12px}
+  .ol-reg{display:flex;flex-direction:column;gap:28px;padding-top:24px}
+  .ol-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .ol-selects{display:flex;flex-direction:column;gap:16px}
+  .ol-retry{display:flex;flex-direction:column;gap:20px}
+  .ol-h2{font-size:16px;font-weight:600;line-height:20px;color:var(--ink)}
+  .ol-stepline{display:flex;align-items:center;gap:8px}
+  .ol-stepline > span:not(.stepper){flex:1;min-width:0;color:#A9AFBC;font-size:16px;font-weight:500;line-height:20px}
+  .ol-stepline .stepper{flex:0 0 auto;margin-left:auto}
+
+  .order-right{padding-left:12px;display:flex;flex-direction:column;gap:12px}
+  .or-title{font-size:20px;font-weight:600;line-height:24px;color:var(--ink);padding:0 24px}
+  .or-table{display:flex;flex-direction:column}
+  .ot-head,.ot-row{display:grid;grid-template-columns:minmax(0,1fr) 170px 180px 140px 160px 52px;align-items:center;padding:0 8px}
+  .ot-head > div{height:48px;display:flex;align-items:center;color:var(--muted);font-size:16px;font-weight:500;line-height:20px;padding:0 16px}
+  .ot-head .r{justify-content:flex-end}
+  .ot-head .c{justify-content:center}
+  .ot-cell{padding:10px 4px}
+  .ot-chip{background:var(--field);border-radius:4px;min-height:40px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:500;line-height:20px;color:var(--ink)}
+  .ot-chip .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ot-chip input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:inherit;font-size:16px;font-weight:500;line-height:20px;color:var(--ink);letter-spacing:-.01em;padding:0}
+  .ot-chip.r input{text-align:right}
+  .ot-chip:has(.chev){cursor:pointer}
+  .ot-chip.r{justify-content:flex-end}
+  .ot-chip .chev{color:var(--muted);flex-shrink:0;margin-left:auto;width:16px;height:16px}
+  .ot-qty{display:flex;align-items:center;justify-content:center;padding:20px 16px}
+  .ot-sum{padding:20px 16px;text-align:right;font-family:"Inter",system-ui,sans-serif;font-weight:600;font-size:16px;line-height:20px;color:var(--ink)}
+  .ot-del{display:flex;align-items:center;justify-content:center;padding:0 16px}
+  .ot-del button{border:0;background:none;cursor:pointer;color:var(--muted);display:grid;place-items:center;padding:0;width:20px;height:20px}
+
+  .or-cards{display:none}
+  .or-foot{display:flex;align-items:center;gap:40px;padding:24px 8px 0}
+  .or-add{display:inline-flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;line-height:20px;color:var(--ink);height:48px;padding:8px 16px;border-radius:4px}
+  .or-add:hover{background:var(--field)}
+  .or-total{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:12px;font-size:16px;font-weight:600;line-height:20px}
+  .or-total .cnt{color:var(--muted)}
+  .or-total .dv{width:2px;height:20px;border-radius:20px;background:#EAEAEC}
+  .or-total .sum{color:var(--ink)}
+  .or-foot .order-submit{background:var(--ink);padding:14px 24px;font-size:16px;line-height:20px}
+
+  .order-mbar{display:none}
+
+  /* ---- add product modal ---- */
+  .addprod-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:80}
+  .addprod-scrim.open{display:block}
+  .addprod{display:none;position:fixed;z-index:81;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,420px);max-height:88vh;overflow:auto;background:#fff;border-radius:16px;padding:24px;flex-direction:column;gap:24px}
+  .addprod.open{display:flex}
+  .ap-head{display:flex;align-items:center;justify-content:space-between}
+  .ap-head span{font-size:24px;font-weight:600;line-height:28px;color:var(--ink)}
+  .ap-close{background:none;border:0;cursor:pointer;color:var(--ink);width:24px;height:24px;display:grid;place-items:center;padding:0}
+  .ap-top{display:flex;flex-direction:column;gap:16px}
+  .addprod .ofield{font-size:16px}
+  .addprod .ofield input{font-size:16px}
+  .ap-price{display:flex;align-items:center;gap:16px}
+  .ap-price .ofield{flex:1}
+  .ap-nds{display:flex;flex-direction:column;gap:20px}
+  .ap-nds-title{font-size:16px;font-weight:600;line-height:20px;color:var(--ink)}
+  .ap-chips{display:flex;flex-wrap:wrap;gap:12px}
+  .ap-chip{background:var(--field);border:0;border-radius:26px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:500;line-height:20px;color:var(--ink)}
+  .ap-chip.on{background:var(--ink);color:#fff}
+  .ap-summa{display:flex;align-items:center;justify-content:space-between}
+  .ap-summa span{font-size:20px;font-weight:600;line-height:24px;color:var(--muted)}
+  .ap-summa b{font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .addprod .order-submit{background:var(--ink);padding:14px 24px;font-size:16px;line-height:20px}
+
+  @media (max-width:900px){
+    #screen-order .order{padding:0 0 24px}
+    .order-titles{padding:16px 24px 0;gap:4px;flex-direction:column;align-items:flex-start}
+    .order-h1,.order-sub{font-size:24px;line-height:30px}
+    .order-topwrap{padding:0 24px}
+    .order-empty{gap:20px}
+    .oe-card{width:100%}
+    .oe-amount{font-size:40px;line-height:40px;padding:24px 0}
+    .order-empty .order-submit{width:100%}
+    .order-full .order-topwrap{margin-bottom:20px}
+    .order-cols{grid-template-columns:1fr}
+    .order-left{border-right:0;padding:0 24px 20px;gap:16px}
+    .order-right{padding:0;gap:16px}
+    .or-title{padding:0 24px}
+    .or-table{display:none}
+    .or-cards{display:flex;flex-direction:column;gap:12px;padding:0 24px}
+    .ocard{background:var(--field);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:12px}
+    .ocard .nm{font-size:16px;font-weight:600;line-height:20px;color:var(--ink)}
+    .ocard .nds{font-size:12px;font-weight:500;line-height:16px;color:var(--muted)}
+    .ocard .row{display:flex;align-items:center;gap:4px}
+    .ocard .row .sm{font-size:12px;font-weight:500;line-height:16px;color:var(--muted)}
+    .ocard .row .x{color:var(--muted);display:inline-flex}
+    .ocard .row .tot{flex:1;text-align:right;font-size:16px;font-weight:600;line-height:20px;color:var(--ink)}
+    .or-foot{padding:20px 24px 0;justify-content:center;gap:0}
+    .or-foot .or-total,.or-foot .order-submit{display:none}
+    .or-add{justify-content:center}
+    .order.has-items .order-inner{padding-bottom:132px}
+    .order.has-items .order-mbar{display:flex;flex-direction:column;gap:10px;position:fixed;left:24px;right:24px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:41;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.14);border:1px solid var(--line)}
+    .omb-total{display:flex;align-items:center;justify-content:space-between;font-size:16px;font-weight:600;line-height:20px}
+    .omb-total .cnt{color:var(--muted)}
+    .omb-total .sum{color:var(--ink)}
+    .order-mbar .order-submit{width:100%;background:var(--ink);padding:14px 24px;font-size:16px;line-height:20px}
+    .addprod{border-radius:20px 20px 0 0;left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-width:none;max-height:92vh;padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px))}
+  }
+
+  /* ===== Платежи / Заказы (payments) ===== */
+  #screen-payments .pay{padding:24px}
+  .pay-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:2px 0 6px}
+  .pay-tabs{display:flex;align-items:center;gap:32px}
+  .pay-tab{background:none;border:0;cursor:pointer;font-family:inherit;font-size:32px;font-weight:600;line-height:40px;color:var(--muted);padding:0}
+  .pay-tab.active{color:var(--ink2)}
+  .pay-actions{display:flex;align-items:center;gap:16px;flex-shrink:0}
+  .pay-search{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 16px;border:0;background:none;cursor:pointer;font-family:inherit;font-size:16px;font-weight:500;color:var(--ink)}
+  .pay-report{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;color:var(--ink)}
+  .pay-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:16px 0 24px}
+  .pf{display:inline-flex;align-items:center;gap:4px;background:var(--field);border:0;border-radius:20px;padding:8px 12px 8px 16px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:500;line-height:20px;white-space:nowrap}
+  .pf .l{color:var(--muted)}
+  .pf b{color:var(--ink2);font-weight:500}
+  .pf svg{color:var(--muted);flex-shrink:0}
+  .pf-div{width:2px;height:20px;border-radius:20px;background:#EAEAEC;flex-shrink:0}
+
+  .pay-table{display:flex;flex-direction:column}
+  .ptrow{display:grid;grid-template-columns:150px 120px 150px 176px minmax(0,1.3fr) minmax(0,1.2fr) minmax(0,0.9fr);align-items:stretch}
+  .pt-head{border-bottom:1px solid #E8ECEE}
+  .pt-head > div{display:flex;align-items:center;height:48px;padding:0 16px;color:var(--muted);font-size:16px;font-weight:500;line-height:20px}
+  .pt-head .r{justify-content:flex-end;text-align:right}
+  .pt-body .ptrow{border-radius:4px;cursor:pointer}
+  .pt-body .ptrow:hover{background:var(--field)}
+  .pt-body .ptrow + .ptrow{margin-top:2px}
+  .ptc{padding:20px 16px;display:flex;flex-direction:column;gap:4px;justify-content:center;min-width:0}
+  .ptc.rt{align-items:flex-end;text-align:right}
+  .ptc .v{font-size:16px;font-weight:500;line-height:20px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .ptc .v.lnk{text-decoration:underline}
+  .ptc .v.num{font-family:"Inter",system-ui,sans-serif}
+  .ptc .s{font-size:12px;font-weight:500;line-height:16px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .ptc .payrow{display:flex;align-items:center;gap:4px;justify-content:flex-end;color:var(--muted);font-size:12px;line-height:16px;font-weight:500}
+  .ptc.status{flex-direction:row;align-items:center;justify-content:flex-start;gap:8px}
+  .st-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .st-dot.paid{background:#1ACE4A}.st-dot.wait{background:#F0AA3E}.st-dot.exp{background:#E5484D}
+  .sbp{width:16px;height:16px;flex-shrink:0}
+
+  .pay-cards{display:none}
+
+  /* ===== Карточка заказа (order-detail) ===== */
+  #screen-order-detail .od{padding:24px}
+  .od-col{max-width:772px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+  .od-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-right:24px}
+  .od-back{display:inline-flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;font-family:inherit;padding:4px 0}
+  .od-back .bk{width:20px;height:20px;color:var(--ink);flex-shrink:0}
+  .od-id{font-size:32px;font-weight:600;line-height:40px;color:var(--ink);white-space:nowrap}
+  .od-copy{color:var(--muted);width:24px;height:24px;flex-shrink:0}
+  .od-date{font-size:16px;font-weight:500;color:var(--muted);white-space:nowrap}
+
+  .od-panel{border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:40px;box-shadow:0 6px 17px rgba(0,0,0,.08);background:#fff}
+  .od-panel.st-paid{background:linear-gradient(105deg,#fff 52%,#eafaef)}
+  .od-panel.st-wait{background:linear-gradient(105deg,#fff 52%,#fdf5e7)}
+  .od-panel.st-exp{background:linear-gradient(105deg,#fff 52%,#fcedec)}
+  .od-amt-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .od-amt{font-family:"Inter",system-ui,sans-serif;font-size:32px;font-weight:600;line-height:32px;color:var(--ink);white-space:nowrap}
+  .od-status{display:inline-flex;align-items:center;gap:12px;padding:4px;font-size:20px;font-weight:600;line-height:24px;color:var(--ink);white-space:nowrap}
+  .od-status .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .od-status .dot.paid{background:#1ACE4A}.od-status .dot.wait{background:#F0AA3E}.od-status .dot.exp{background:#E5484D}
+  .od-linkwrap{display:flex;flex-direction:column;gap:20px}
+  .od-linktitles{display:flex;gap:20px}
+  .od-linktitles > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+  .od-linktitles .t{font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .od-linktitles .d{font-size:16px;font-weight:500;line-height:20px;color:var(--muted)}
+  .od-fields{display:flex;gap:16px}
+  .od-field{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:#F7F7F8;border-radius:4px;height:48px;padding:8px 16px}
+  .od-field .fic{width:20px;height:20px;color:var(--muted);flex-shrink:0}
+  .od-field .ft{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px;font-weight:500;line-height:20px;color:var(--ink)}
+  .od-field .ft.ph{color:var(--muted);font-weight:400}
+
+  .od-sec{padding:40px 24px 0;display:flex;flex-direction:column;gap:20px}
+  .od-sec h3{margin:0;font-size:24px;font-weight:600;line-height:24px;color:var(--ink)}
+  .od-drow{display:flex;gap:4px;font-size:16px;font-weight:500;line-height:20px}
+  .od-drow .k{width:100px;flex-shrink:0;color:#878E91}
+  .od-drow .v{flex:1;min-width:0;color:var(--ink)}
+  .od-more{display:inline-flex;align-items:center;gap:4px;color:#878E91;cursor:pointer;font-size:16px;font-weight:500;line-height:20px}
+  .od-more svg{width:16px;height:16px;flex-shrink:0}
+
+  .od-oprow{display:flex;align-items:center;gap:16px;padding:16px 24px}
+  .od-oprow .opdot{width:8px;height:8px;border-radius:50%;background:#8E92AA;flex-shrink:0;outline:2px solid #ECECEC}
+  .od-oprow .opname{font-size:16px;font-weight:500;color:var(--ink)}
+  .od-oprow .optime{flex:1;text-align:right;font-size:16px;font-weight:500;color:#A9AFBC}
+
+  .od-poscount{color:var(--ink);font-size:14px;font-weight:600;margin-left:6px}
+  .od-postable{display:flex;flex-direction:column}
+  .od-pos-h,.od-pos-r{display:grid;grid-template-columns:minmax(0,1fr) 130px 60px 130px;align-items:center;padding:0 8px}
+  .od-pos-h > div{height:48px;display:flex;align-items:center;color:var(--muted);font-size:16px;font-weight:500;line-height:20px;padding:0 16px}
+  .od-pos-h .r{justify-content:flex-end}
+  .od-pos-r{padding:14px 8px}
+  .od-pos-r .nm{padding:6px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+  .od-pos-r .nm b{font-weight:500;font-size:16px;line-height:20px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .od-pos-r .nm span{font-size:12px;line-height:16px;color:var(--muted)}
+  .od-pos-r .pr{padding:6px 16px;text-align:right;font-size:16px;font-weight:500;color:var(--ink)}
+  .od-pos-r .qt{padding:6px 8px;display:flex;align-items:center;gap:4px;justify-content:center;font-size:16px;color:var(--ink)}
+  .od-pos-r .qt svg{width:12px;height:12px}
+
+  @media (max-width:900px){
+    #screen-payments .pay{padding:0 0 24px}
+    .pay-head{flex-wrap:wrap;padding:16px 24px 0;gap:12px}
+    .pay-tab{font-size:24px;line-height:30px}
+    .pay-actions{gap:8px}
+    .pay-report .rl{display:none}
+    .pay-filters{flex-wrap:nowrap;overflow-x:auto;padding:16px 24px 20px;-webkit-overflow-scrolling:touch}
+    .pay-filters::-webkit-scrollbar{display:none}
+    .pay-table{display:none}
+    .pay-cards{display:flex;flex-direction:column;gap:12px;padding:0 24px}
+    .pcard{background:var(--field);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer}
+    .pcard-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .pcard-id{font-size:16px;font-weight:600;line-height:20px;text-decoration:underline}
+    .pcard-status{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap}
+    .pcard-sum{font-family:"Inter",system-ui,sans-serif;font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+    .pcard-sub{font-size:13px;font-weight:500;line-height:18px;color:var(--muted)}
+
+    #screen-order-detail .od{padding:0 0 120px}
+    .od-col{max-width:none;gap:20px;padding:16px 24px 0}
+    .od-head{padding-right:0;flex-wrap:wrap;gap:8px}
+    .od-id{font-size:24px;line-height:30px}
+    .od-date{width:100%;font-size:14px}
+    .od-amt-row{flex-wrap:wrap;gap:8px}
+    .od-linktitles{flex-direction:column;gap:16px}
+    .od-fields{flex-direction:column}
+    .od-sec{padding:24px 0 0}
+    .od-oprow{padding:12px 0}
+    .od-pos-h,.od-pos-r{grid-template-columns:minmax(0,1fr) 96px 40px 96px}
+    .od-pos-h > div,.od-pos-r .nm,.od-pos-r .pr{padding-left:8px;padding-right:8px}
+  }
+
+  /* op id subline in table */
+  .ptc .idsub{font-size:12px;font-weight:500;line-height:16px;color:var(--muted)}
+  .st-dot.new{background:#8E92AA}
+
+  /* ===== Операция (side panel) ===== */
+  .oppanel-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:80}
+  .oppanel-scrim.open{display:block}
+  .oppanel{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100%;background:#fff;z-index:81;transform:translateX(100%);transition:transform .25s ease;overflow:auto;padding:32px}
+  .oppanel.open{transform:none;box-shadow:-8px 0 30px rgba(0,0,0,.12)}
+  .op-inner{display:flex;flex-direction:column;gap:48px}
+  .op-top{display:flex;flex-direction:column;gap:32px}
+  .op-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .op-htitles{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .op-title{display:inline-flex;align-items:center;gap:8px;font-size:24px;font-weight:600;line-height:28px;color:var(--ink2)}
+  .op-title .lk{width:20px;height:20px;color:#9AA1AE;flex-shrink:0}
+  .op-date{font-size:16px;font-weight:500;color:var(--muted)}
+  .op-close{border:0;background:none;cursor:pointer;color:var(--ink);width:24px;height:24px;flex-shrink:0;display:grid;place-items:center;padding:0}
+  .op-amt{font-family:"Inter",system-ui,sans-serif;font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .op-status{display:flex;flex-direction:column;gap:8px}
+  .op-status .st{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .op-status .st .d{width:12px;height:12px;border-radius:50%;background:#1ACE4A;flex-shrink:0}
+  .op-status .st .d.new{background:#8E92AA}.op-status .st .d.exp{background:#E5484D}
+  .op-status .sub{font-size:16px;font-weight:500;color:var(--muted)}
+  .op-btn{height:48px;border:0;border-radius:4px;background:var(--ink);color:#fff;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer}
+  .op-sec{display:flex;flex-direction:column;gap:20px}
+  .op-sec.big{gap:24px}
+  .op-sec h3{margin:0;font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .op-sec h3.h24{font-size:24px}
+  .op-r{display:flex;gap:16px;font-size:16px;font-weight:500;line-height:20px}
+  .op-r .k{width:120px;flex-shrink:0;color:var(--muted)}
+  .op-r .v{flex:1;min-width:0;color:var(--ink);overflow-wrap:anywhere}
+  @media (max-width:900px){ .oppanel{width:100%;padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px))} }
+
+  /* ===== Сотрудники (employees) ===== */
+  #screen-employees .emp{padding:24px}
+  .emp-col{width:480px;max-width:100%;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+  .emp-head{display:flex;flex-direction:column;gap:16px}
+  .emp-titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .emp-title{display:flex;align-items:flex-start;gap:4px;padding:2px 0 6px}
+  .emp-title h1{margin:0;font-size:32px;font-weight:600;line-height:40px;color:var(--ink)}
+  .emp-title .cnt{font-size:15px;font-weight:600;line-height:16px;color:var(--ink)}
+  .emp-create{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px;border:0;border-radius:4px;background:var(--ink);color:#fff;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;flex-shrink:0}
+  .emp-create svg{width:20px;height:20px}
+  .emp-filter{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;background:var(--field);border:0;border-radius:16px;padding:8px 8px 8px 12px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:500;line-height:20px}
+  .emp-filter .l{color:var(--muted)} .emp-filter b{color:var(--ink);font-weight:500} .emp-filter svg{color:var(--muted);width:16px;height:16px}
+  .emp-list{display:flex;flex-direction:column;gap:12px}
+  .emp-card{background:var(--field);border-radius:4px;padding:24px;display:flex;flex-direction:column;gap:12px;cursor:pointer}
+  .emp-card .nm{font-size:20px;font-weight:600;line-height:24px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .emp-card .row{display:flex;align-items:center;gap:12px}
+  .emp-card .mail{flex:1;min-width:0;color:var(--muted);font-size:16px;font-weight:500;line-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .emp-card .sec{color:var(--muted);font-size:16px;font-weight:500;line-height:20px;white-space:nowrap}
+  .emp-role{width:24px;height:24px;flex-shrink:0;display:grid;place-items:center}
+  .emp-role svg{width:14px;height:14px;color:#fff}
+  .emp-role.edit{background:#3E8DF7}.emp-role.view{background:#51D475}
+
+  /* employee side panels */
+  .emp-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:80}
+  .emp-scrim.open{display:block}
+  .emppanel{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100%;background:#fff;z-index:81;transform:translateX(100%);transition:transform .25s ease;overflow:auto;padding:24px;display:flex;flex-direction:column;justify-content:space-between;gap:40px}
+  .emppanel.open{transform:none;box-shadow:-6px 0 34px rgba(0,0,0,.08)}
+  .ep-close{border:0;background:none;cursor:pointer;color:var(--ink);width:24px;height:24px;padding:0;display:grid;place-items:center;flex-shrink:0}
+  .ep-close svg{width:18px;height:18px}
+
+  /* detail */
+  .epd-top{display:flex;flex-direction:column;gap:40px}
+  .epd-head{display:flex;flex-direction:column;gap:12px}
+  .epd-titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .epd-title{font-size:24px;font-weight:600;line-height:28px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .epd-mail{color:var(--muted);font-size:16px;font-weight:500;line-height:20px}
+  .epd-acc-head{display:flex;align-items:center;justify-content:space-between}
+  .epd-acc-head .t{display:flex;align-items:flex-start;gap:4px;font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .epd-acc-head .t .c{font-size:13px;font-weight:600;line-height:16px}
+  .epd-add{display:inline-flex;align-items:center;gap:8px;border:0;background:none;cursor:pointer;color:var(--ink);font-family:inherit;font-size:16px;font-weight:600;padding:14px 0}
+  .epd-add svg{width:20px;height:20px}
+  .epd-item{display:flex;align-items:center;gap:12px;padding:20px 0}
+  .epd-item .info{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .epd-item .sname{font-size:16px;font-weight:500;line-height:20px;color:var(--ink)}
+  .epd-item .rrow{display:flex;align-items:center;gap:12px}
+  .epd-item .rrow .lvl{color:var(--muted);font-size:16px;font-weight:500;line-height:20px}
+  .epd-item .chev{color:var(--muted);flex-shrink:0;width:16px;height:16px}
+  .ep-btn{height:48px;border:0;border-radius:4px;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center}
+  .ep-btn.ghost{background:var(--field);color:var(--ink)}
+  .ep-btn.dark{background:var(--ink);color:#fff}
+
+  /* new employee */
+  .epn-top{display:flex;flex-direction:column;gap:40px}
+  .epn-htitle{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;font-size:24px;font-weight:600;line-height:28px;color:var(--ink)}
+  .epn-fields{display:flex;flex-direction:column;gap:20px}
+  .epn-fg{display:flex;flex-direction:column;gap:6px}
+  .epn-field{display:flex;align-items:center;gap:8px;background:var(--field);border-radius:4px;min-height:48px;padding:8px 16px}
+  .epn-field .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .epn-field .lab{font-size:12px;font-weight:500;line-height:16px;color:var(--muted)}
+  .epn-field .val{font-size:16px;font-weight:500;line-height:20px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .epn-field svg{color:var(--muted);flex-shrink:0;width:20px;height:20px}
+  .epn-hint{font-size:12px;font-weight:500;line-height:16px;color:var(--muted)}
+  .epn-sec{display:flex;flex-direction:column;gap:16px}
+  .epn-sec h3{margin:0;font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .epn-levels{display:flex;gap:12px;flex-wrap:wrap}
+  .epn-lvl{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:26px;padding:8px 16px 8px 12px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;line-height:20px;background:var(--field);color:var(--ink2)}
+  .epn-lvl.on{background:#1F92FF;color:#fff}
+  .epn-lvl svg{width:20px;height:20px;flex-shrink:0}
+  .epn-can{display:flex;flex-direction:column;gap:16px}
+  .epn-can .h{font-size:16px;font-weight:600;line-height:20px;color:var(--ink)}
+  .epn-can .li{font-size:16px;font-weight:500;line-height:20px;color:#707679}
+
+  @media (max-width:900px){
+    #screen-employees .emp{padding:16px 24px 24px}
+    .emp-col{width:100%;gap:28px}
+    .emppanel{width:100%;padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px))}
+  }
+
+  /* ===== Секторы (sectors) ===== */
+  #screen-sectors .sec{padding:24px}
+  .sec-title{display:flex;align-items:flex-start;gap:4px;padding:2px 0 24px;font-size:32px;font-weight:600;line-height:40px;color:var(--ink)}
+  .sec-title .cnt{font-size:15px;font-weight:600;line-height:16px}
+
+  /* list of sectors */
+  .sec-listview{max-width:608px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+  .sec-lhead{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .sec-lhead .sec-title{padding:0}
+  .sec-search{width:240px;max-width:46%;display:flex;align-items:center;gap:8px;background:var(--field);border-radius:4px;height:48px;padding:0 16px;flex-shrink:0}
+  .sec-search svg{width:24px;height:24px;color:var(--muted);flex-shrink:0}
+  .sec-search span{color:var(--muted);font-size:15px;line-height:20px}
+  .sec-search-in{flex:1;min-width:0;border:0;background:none;outline:none;font-family:inherit;font-size:15px;line-height:20px;color:var(--ink);letter-spacing:-.01em;padding:0}
+  .sec-search-in::placeholder{color:var(--muted)}
+  .sec-list{display:flex;flex-direction:column;gap:12px}
+  .sec-empty{color:var(--muted);font-size:16px;line-height:20px;padding:8px 4px}
+  .sec-item{background:var(--field);border-radius:4px;padding:24px;display:flex;flex-direction:column;gap:12px;cursor:pointer}
+  .sec-item .code{font-size:15px;font-weight:500;line-height:20px;color:var(--muted)}
+  .sec-item .nm{font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
+  .sec-item.selected{background:#fff;box-shadow:inset 0 0 0 1px #282828}
+  /* right modal panel */
+  .sec-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:80}
+  .sec-scrim.open{display:block}
+  .secpanel{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;background:#fff;z-index:81;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;gap:24px;padding:40px}
+  .secpanel.open{transform:none;box-shadow:-6px 0 34px rgba(0,0,0,.1)}
+  .secpanel-scroll{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:32px}
+  .secpanel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .sec-pclose{border:0;background:none;cursor:pointer;color:var(--ink);width:24px;height:24px;padding:0;display:grid;place-items:center;flex-shrink:0}
+  .sec-pclose svg{width:18px;height:18px}
+  .sec-card{max-width:608px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:40px;display:flex;flex-direction:column;gap:32px}
+  .sec-org{display:flex;flex-direction:column;gap:4px}
+  .sec-org .lbl{font-size:16px;font-weight:500;color:var(--muted);line-height:20px}
+  .sec-org .name{font-size:24px;font-weight:700;color:var(--ink);line-height:30px}
+  .sec-fields{display:flex;flex-direction:column;gap:20px}
+  .sf{display:flex;flex-direction:column;gap:4px}
+  .sf .k{font-size:15px;font-weight:500;color:var(--muted);line-height:20px}
+  .sf .v{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:500;color:var(--ink);line-height:20px;min-width:0}
+  .sf .v .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .sf .v .cp{color:var(--muted);cursor:pointer;width:20px;height:20px;flex-shrink:0}
+  .sf .v .cp svg{width:20px;height:20px;display:block}
+  .secpanel .sf{background:var(--field);border-radius:4px;min-height:56px;padding:8px 16px;justify-content:center}
+  .sec-acc{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+  .sec-acc .t{font-size:20px;font-weight:600;color:var(--ink);line-height:24px}
+  .sec-acc .chev{color:var(--ink);transition:transform .2s;flex-shrink:0}
+  .sec-acc.open .chev{transform:rotate(180deg)}
+  .sec-acc-body{max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .sec-acc-body .inner{padding-top:16px;display:flex;flex-direction:column;gap:16px}
+  .sec-notif{display:flex;flex-direction:column;gap:20px}
+  .sec-notif h3{margin:0;font-size:20px;font-weight:600;color:var(--ink);line-height:24px}
+  .sec-nrow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--field);border-radius:4px;min-height:48px;padding:14px 16px}
+  .sec-nrow .lab{font-size:16px;font-weight:500;color:var(--ink);line-height:20px}
+  .sec-nrow .add{border:0;background:none;cursor:pointer;color:var(--ink);width:24px;height:24px;display:grid;place-items:center;flex-shrink:0}
+  .sec-nrow .add svg{width:20px;height:20px}
+  .sec-edit{height:56px;border:0;border-radius:8px;background:var(--card);color:var(--ink);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+  .sec-edit:hover{background:#efefef}
+  .sec-edit svg{width:20px;height:20px}
+
+  @media (max-width:900px){
+    #screen-sectors .sec{padding:16px 24px 24px}
+    .sec-title{font-size:28px;line-height:36px;padding:0 0 20px}
+    .sec-card{max-width:none;padding:24px;gap:28px}
+    .sec-org .name{font-size:22px;line-height:28px}
+    .sec-listview{max-width:none;gap:20px}
+    .sec-lhead{flex-direction:column;align-items:stretch;gap:16px}
+    .sec-lhead .sec-title{font-size:28px;line-height:36px}
+    .sec-search{width:100%;max-width:none}
+    .secpanel{width:100%;padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px));gap:20px}
+  }
+
+  /* ===== Настройки (profile settings panel) ===== */
+  .set-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:80}
+  .set-scrim.open{display:block}
+  .setpanel{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100%;background:#fff;z-index:81;transform:translateX(100%);transition:transform .25s ease;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:24px}
+  .setpanel.open{transform:none;box-shadow:-6px 0 34px rgba(0,0,0,.1)}
+  .set-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .set-head .info{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .set-head .nm{font-size:24px;font-weight:600;line-height:28px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .set-head .ph{font-size:16px;font-weight:500;line-height:20px;color:var(--muted)}
+  .set-close{border:0;background:none;cursor:pointer;color:var(--ink);width:24px;height:24px;padding:0;display:grid;place-items:center;flex-shrink:0}
+  .set-close svg{width:18px;height:18px}
+  .set-list{display:flex;flex-direction:column}
+  .set-item{display:flex;align-items:center;gap:12px;padding:12px 0;min-height:48px}
+  .set-item .ico{width:24px;height:24px;flex-shrink:0;color:var(--ink);display:grid;place-items:center}
+  .set-item .ico svg{width:22px;height:22px}
+  .set-item .lb{flex:1;min-width:0;font-size:16px;font-weight:600;line-height:20px;color:var(--ink)}
+  .set-item .chev{color:var(--ink);flex-shrink:0;transition:transform .2s}
+  .set-item .chev svg{width:22px;height:22px;display:block}
+  .set-acc.open > .set-item .chev{transform:rotate(180deg)}
+  .set-item .lang{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-size:16px;font-weight:500}
+  .set-item .lang svg{width:22px;height:22px}
+  .set-item.logout .ico,.set-item.logout .lb{color:var(--danger)}
+  .set-divider{height:1px;background:#EEEEEE;margin:8px 0}
+  .set-toggle{flex-shrink:0;width:40px;height:20px;border-radius:20px;background:#d9dcde;border:0;cursor:pointer;position:relative;padding:0;transition:background .15s}
+  .set-toggle::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .set-toggle.on{background:var(--ink)}
+  .set-toggle.on::after{left:22px}
+  /* accordion body */
+  .set-body{max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .set-body .inner{padding:8px 0 16px;display:flex;flex-direction:column;gap:12px}
+  .set-pf{background:var(--field);border-radius:4px;padding:8px 16px;min-height:56px;display:flex;align-items:center;gap:8px}
+  .set-pf .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .set-pf .lab{font-size:12px;font-weight:500;line-height:16px;color:var(--muted)}
+  .set-pf input{border:0;background:none;outline:none;font-family:inherit;font-size:16px;font-weight:500;line-height:20px;color:var(--ink);letter-spacing:-.01em;padding:0;width:100%}
+  .set-pf input::placeholder{color:var(--muted);font-weight:400}
+  .set-pf.focus{box-shadow:inset 0 0 0 1px #282828}
+  .set-pf .eye{border:0;background:none;cursor:pointer;color:var(--muted);width:24px;height:24px;flex-shrink:0;display:grid;place-items:center;padding:0}
+  .set-pf .eye svg{width:22px;height:22px}
+  .set-hint{font-size:12px;font-weight:500;line-height:16px;color:var(--muted)}
+  .set-pbtns{display:flex;gap:12px}
+  .set-pbtns button{flex:1;height:48px;border:0;border-radius:4px;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer}
+  .set-pbtns .cancel{background:var(--field);color:var(--ink)}
+  .set-pbtns .save{background:var(--ink);color:#fff}
+  .set-sections{display:flex;flex-direction:column}
+  .set-srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;font-size:16px;font-weight:500;line-height:20px;color:var(--ink)}
+  .set-survey{margin-top:auto;display:flex;gap:12px;background:var(--field);border-radius:12px;padding:16px}
+  .set-survey .qi{width:24px;height:24px;flex-shrink:0;color:var(--ink);display:grid;place-items:center}
+  .set-survey .qi svg{width:22px;height:22px}
+  .set-survey .st{font-size:15px;font-weight:600;line-height:20px;color:var(--ink)}
+  .set-survey .sd{font-size:13px;font-weight:500;line-height:18px;color:var(--muted);margin-top:4px}
+  @media (max-width:900px){ .setpanel{width:100%;padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px))} }
+</style>
+
+<div class="app">
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+    <svg class="logo" viewBox="0 0 118 32" fill="#37e6e9" xmlns="http://www.w3.org/2000/svg" aria-label="Paygine">
+      <path d="M76.811 7.149V23.969H81.093V7.149H76.811Z"/>
+      <path d="M77.025 4.724C77.515 5.213 78.157 5.458 78.952 5.458C79.727 5.458 80.359 5.213 80.848 4.724C81.358 4.213 81.613 3.553 81.613 2.745C81.613 1.915 81.348 1.255 80.818 0.766C80.308 0.255 79.696 0 78.983 0C78.208 0 77.566 0.255 77.056 0.766C76.546 1.277 76.292 1.947 76.292 2.777C76.292 3.564 76.536 4.213 77.025 4.724Z"/>
+      <path d="M84.487 23.969V7.149H88.493L88.707 9.096C89.156 8.522 89.665 8.075 90.236 7.756C90.827 7.415 91.419 7.181 92.010 7.054C92.622 6.926 93.172 6.862 93.661 6.862C95.211 6.862 96.414 7.213 97.270 7.915C98.147 8.618 98.769 9.564 99.136 10.756C99.523 11.926 99.717 13.235 99.717 14.682V23.969H95.435V15.256C95.435 14.746 95.394 14.235 95.313 13.724C95.231 13.214 95.078 12.745 94.854 12.320C94.650 11.894 94.355 11.554 93.967 11.299C93.580 11.043 93.070 10.916 92.438 10.916C91.623 10.916 90.940 11.128 90.389 11.554C89.839 11.979 89.431 12.554 89.166 13.277C88.901 14.001 88.768 14.799 88.768 15.671V23.969H84.487Z"/>
+      <path fill-rule="evenodd" d="M110.373 24.193C108.681 24.193 107.243 23.842 106.061 23.140C104.878 22.437 103.971 21.448 103.339 20.171C102.707 18.873 102.391 17.363 102.391 15.639C102.391 13.894 102.717 12.373 103.370 11.075C104.022 9.756 104.940 8.724 106.122 7.979C107.325 7.235 108.742 6.862 110.373 6.862C111.596 6.862 112.667 7.075 113.584 7.501C114.522 7.926 115.307 8.522 115.939 9.288C116.591 10.054 117.071 10.948 117.376 11.969C117.703 12.969 117.855 14.054 117.835 15.224C117.835 15.522 117.825 15.809 117.804 16.086C117.784 16.363 117.743 16.639 117.682 16.916H106.642C106.703 17.554 106.877 18.139 107.162 18.671C107.447 19.203 107.845 19.629 108.355 19.948C108.885 20.246 109.537 20.395 110.312 20.395C110.822 20.395 111.291 20.342 111.719 20.235C112.147 20.108 112.514 19.916 112.820 19.661C113.125 19.405 113.340 19.108 113.462 18.767H117.682C117.417 20.022 116.918 21.054 116.184 21.863C115.470 22.672 114.604 23.267 113.584 23.650C112.565 24.012 111.494 24.193 110.373 24.193ZM106.734 13.788H113.737C113.717 13.214 113.574 12.682 113.309 12.192C113.064 11.682 112.687 11.277 112.177 10.979C111.688 10.660 111.056 10.501 110.281 10.501C109.507 10.501 108.854 10.660 108.324 10.979C107.814 11.299 107.427 11.714 107.162 12.224C106.917 12.714 106.775 13.235 106.734 13.788Z"/>
+      <path d="M42.333 31.240C43.515 31.580 44.728 31.750 45.972 31.750C47.562 31.750 48.888 31.506 49.948 31.016C51.028 30.548 51.885 29.867 52.517 28.974C53.169 28.080 53.628 27.005 53.893 25.750C54.178 24.495 54.321 23.101 54.321 21.569V7.175H50.039V15.186C50.039 16.015 49.948 16.813 49.764 17.579C49.601 18.345 49.275 18.984 48.786 19.494C48.296 19.984 47.562 20.228 46.584 20.228C45.829 20.228 45.228 20.090 44.779 19.814C44.331 19.516 43.994 19.133 43.770 18.665C43.546 18.196 43.403 17.686 43.342 17.133C43.281 16.579 43.250 16.026 43.250 15.473V7.175H38.969V16.398C38.969 17.909 39.173 19.260 39.580 20.452C40.009 21.622 40.692 22.548 41.629 23.229C42.567 23.910 43.811 24.250 45.360 24.250C45.952 24.250 46.543 24.186 47.134 24.058C47.725 23.931 48.276 23.729 48.786 23.452C49.316 23.154 49.754 22.761 50.101 22.271V23.165C50.101 24.612 49.713 25.718 48.939 26.484C48.184 27.250 47.022 27.633 45.452 27.633C44.433 27.633 43.505 27.474 42.669 27.154C41.833 26.856 41.089 26.452 40.437 25.942L38.999 29.516C40.039 30.325 41.150 30.899 42.333 31.240Z"/>
+      <path fill-rule="evenodd" d="M73.449 21.859C73.449 16.963 73.449 12.067 73.449 7.171H69.535L69.168 8.863C68.617 8.224 67.955 7.746 67.180 7.427C66.405 7.086 65.518 6.916 64.519 6.916C62.868 6.916 61.492 7.310 60.391 8.097C59.290 8.884 58.464 9.948 57.913 11.288C57.363 12.629 57.088 14.118 57.088 15.757C57.088 17.246 57.332 18.640 57.822 19.938C58.311 21.215 59.086 22.247 60.146 23.034C61.206 23.821 62.582 24.215 64.274 24.215C64.825 24.215 65.396 24.140 65.987 23.991C66.599 23.864 67.180 23.640 67.730 23.321C68.281 23.002 68.739 22.534 69.106 21.917C69.082 22.372 69.094 22.709 69.077 23.182C69.030 24.452 68.860 25.470 68.052 26.428C67.357 27.251 66.131 27.577 64.557 27.577C63.535 27.577 62.605 27.417 61.768 27.098C60.930 26.800 60.184 26.396 59.530 25.885L58.089 29.460C59.131 30.268 60.245 30.843 61.430 31.183C62.616 31.524 63.832 31.694 65.078 31.694C66.672 31.694 68.000 31.449 69.063 30.960C70.146 30.492 71.004 29.811 71.638 28.917C72.292 28.024 72.752 26.949 73.017 25.694C73.282 24.533 73.429 23.256 73.449 21.859ZM67.424 19.555C66.854 19.980 66.120 20.193 65.223 20.193C64.285 20.193 63.530 19.991 62.959 19.587C62.389 19.161 61.981 18.608 61.736 17.927C61.492 17.225 61.369 16.470 61.369 15.661C61.369 14.874 61.481 14.129 61.706 13.427C61.950 12.703 62.358 12.108 62.929 11.640C63.500 11.150 64.275 10.905 65.253 10.905C66.150 10.905 66.884 11.118 67.455 11.544C68.026 11.948 68.454 12.501 68.739 13.203C69.025 13.884 69.168 14.661 69.168 15.533C69.168 16.363 69.025 17.140 68.739 17.863C68.454 18.565 68.016 19.129 67.424 19.555Z"/>
+      <path d="M35.642 7.168V23.970H31.653C31.653 23.970 31.379 22.300 31.299 21.913C30.932 22.530 30.473 22.999 29.923 23.318C29.372 23.637 28.791 23.860 28.180 23.988C27.589 24.137 27.018 24.211 26.467 24.211C24.775 24.211 23.399 23.818 22.339 23.030C21.278 22.243 20.504 21.211 20.014 19.935C19.687 19.066 19.469 18.155 19.361 17.201H23.724C23.779 17.448 23.847 17.689 23.929 17.924C24.174 18.605 24.581 19.158 25.152 19.583C25.723 19.988 26.477 20.190 27.415 20.190C28.312 20.190 29.046 19.977 29.617 19.552C30.208 19.126 30.647 18.562 30.932 17.860C31.218 17.137 31.360 16.360 31.360 15.530C31.360 14.658 31.218 13.881 30.932 13.200C30.647 12.498 30.219 11.945 29.648 11.540C29.077 11.115 28.343 10.902 27.446 10.902C26.467 10.902 25.692 11.147 25.122 11.636C24.551 12.104 24.143 12.700 23.898 13.424C23.876 13.494 23.854 13.565 23.834 13.637H19.447C19.583 12.808 19.803 12.024 20.106 11.285C20.657 9.945 21.482 8.881 22.583 8.094C23.684 7.306 25.060 6.913 26.712 6.913C27.711 6.913 28.598 7.083 29.372 7.423C30.147 7.742 30.810 8.221 31.360 8.860L31.727 7.168H35.642Z"/>
+      <path d="M0 30.278V7.170H4.006L4.220 9.277C4.873 8.447 5.617 7.840 6.453 7.457C7.309 7.074 8.247 6.883 9.266 6.883C10.857 6.883 12.172 7.266 13.211 8.032C14.251 8.798 15.026 9.841 15.536 11.160C15.850 11.929 16.071 12.754 16.199 13.635H11.799C11.772 13.544 11.743 13.452 11.713 13.362C11.468 12.639 11.060 12.064 10.490 11.639C9.939 11.192 9.185 10.968 8.227 10.968C7.370 10.968 6.646 11.192 6.055 11.639C5.464 12.064 5.015 12.628 4.710 13.330C4.404 14.032 4.251 14.788 4.251 15.596C4.251 16.405 4.394 17.160 4.679 17.862C4.985 18.564 5.433 19.128 6.025 19.554C6.636 19.979 7.401 20.192 8.318 20.192C9.277 20.192 10.031 19.969 10.581 19.522C11.132 19.075 11.519 18.511 11.743 17.830C11.810 17.622 11.866 17.413 11.913 17.201H16.231C16.106 18.207 15.864 19.140 15.505 20.001C14.975 21.299 14.170 22.331 13.089 23.097C12.009 23.841 10.663 24.214 9.052 24.214C8.359 24.214 7.707 24.129 7.095 23.958C6.483 23.788 5.943 23.565 5.474 23.288C5.005 22.990 4.608 22.660 4.281 22.299V30.278H0Z"/>
+    </svg>
+    <button class="collapse-toggle" id="collapseToggle" type="button" aria-label="Свернуть меню">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M14.5 9.5 12 12l2.5 2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    </div>
+    <nav class="nav-list" id="navList"></nav>
+    <div class="nav-bottom">
+      <button class="nav" type="button" data-screen="support" id="navSupport">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.2a2.85 2.85 0 1 1 3.6 2.75c-.8.3-1.35.95-1.35 1.8"/><circle cx="12" cy="17.4" r="1.05" fill="currentColor" stroke="none"/></svg></span><span class="label">Подержка</span>
+      </button>
+      <button class="nav" type="button" id="navSettings" data-settings>
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path transform="matrix(0 1 -1 0 22.5 1.5)" d="M10.5 0L19.593 5.25V15.75L10.5 21L1.407 15.75V5.25Z"/><circle cx="12" cy="12" r="4"/></svg></span><span class="label">Настройки</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="statusbar">
+      <span class="sb-time">9:41</span>
+      <span class="sb-notch"></span>
+      <span class="sb-icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 2.2c2.6 0 5 1 6.8 2.6l1.2-1.4C14.4 1.4 11.6 0.2 8.5 0.2S2.6 1.4 0.5 3.4L1.7 4.8C3.5 3.2 5.9 2.2 8.5 2.2Z"/><path d="M8.5 5.6c1.5 0 2.9 0.6 3.9 1.6l1.2-1.4C12.3 4.5 10.5 3.8 8.5 3.8S4.7 4.5 3.4 5.8l1.2 1.4C5.6 6.2 7 5.6 8.5 5.6Z"/><path d="M8.5 9c0.8 0 1.5 0.3 2 0.9l-2 2.1-2-2.1C7 9.3 7.7 9 8.5 9Z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="19" height="9" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="5" rx="1" fill="currentColor" opacity="0.4"/></svg>
+      </span>
+    </div>
+
+    <section class="screen active" id="screen-home">
+      <div class="home-col">
+        <div class="home-head">
+          <div class="title-wrap">
+            <h1 class="home-title">Главная</h1>
+            <button class="icon-btn" id="gearBtn" type="button" aria-label="Настроить виджеты">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path transform="matrix(0 1 -1 0 22.5 1.5)" d="M10.5 0L19.593 5.25V15.75L10.5 21L1.407 15.75V5.25Z"/><circle cx="12" cy="12" r="4"/></svg>
+            </button>
+          </div>
+          <div class="home-actions">
+            <button class="report-btn" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 20h14"/></svg><span class="rl">Выгрузить отчёт</span></button>
+            <button class="icon-btn" type="button" aria-label="Уведомления"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot"></span></button>
+          </div>
+        </div>
+
+        <div class="filters">
+          <button class="chip" type="button">Период:&nbsp;<b>Сегодня</b> <span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <button class="chip" type="button">Сектор:&nbsp;<b>Все</b> <span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <span class="updated">Обновлено 15 минут назад <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></svg></span>
+        </div>
+
+        <div class="grid">
+          <div class="widget qorder" data-widget="qorder">
+            <div class="widget-title">Быстрый заказ</div>
+            <div class="qorder-body">
+              <div class="qorder-amt">14 599,99 ₽</div>
+              <div class="qorder-num">1255-01</div>
+              <div class="qorder-desc">Оплата покупки в турагентстве «Сказочный отпуск»</div>
+              <button class="qorder-btn" type="button"><span class="d-label">Создать заказ</span><span class="m-label">Выбрать сектор</span></button>
+            </div>
+            <button class="trash" type="button" aria-label="Удалить виджет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+          </div>
+
+          <div class="widget" data-widget="avg">
+            <div class="widget-head">
+              <div>
+                <div class="metric-label">Средний чек <span class="q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.8.3-1.2.9-1.2 1.6" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor" stroke="none"/></svg></span></div>
+                <div class="metric-value" style="margin-top:8px">515 <span class="cur">₽</span></div>
+              </div>
+            </div>
+            <img class="chart-img" src="img/chart-avg.png" alt="График среднего чека за сутки">
+            <button class="trash" type="button" aria-label="Удалить виджет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+          </div>
+
+          <div class="widget" data-widget="revenue">
+            <div class="widget-head">
+              <div>
+                <div class="metric-label">Выручка <span class="q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.8.3-1.2.9-1.2 1.6" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor" stroke="none"/></svg></span></div>
+                <div class="metric-value" style="margin-top:8px">113 589 <span class="cur">₽</span></div>
+              </div>
+            </div>
+            <img class="chart-img" src="img/chart-revenue.png" alt="График выручки по времени суток">
+            <button class="trash" type="button" aria-label="Удалить виджет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+          </div>
+
+          <div class="widget" data-widget="orders">
+            <div class="widget-head">
+              <div>
+                <div class="metric-label">Заказы</div>
+                <div class="metric-value" style="margin-top:8px">113 589 <span class="cur">₽</span></div>
+              </div>
+              <div class="seg" id="ordersSeg"><button type="button" class="on">шт</button><button type="button">₽</button></div>
+            </div>
+            <img class="chart-img" src="img/chart-orders.png" alt="График заказов по статусам">
+            <button class="trash" type="button" aria-label="Удалить виджет"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+          </div>
+        </div>
+
+        <div class="home-banner" type="button">
+          <span class="bl"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5l1.3 3.9 3.9 1.3-3.9 1.3L11 12.9 9.7 9 5.8 7.7l3.9-1.3z"/><circle cx="17.5" cy="14.5" r="1.5"/><circle cx="6" cy="16" r="1.1"/></svg> Обновление на странице Заказы</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-support">
+    <div class="col">
+      <h1 class="page-title">Поддержка</h1>
+
+      <div class="main">
+        <section class="contacts-block">
+          <div class="contacts-label">Контакты</div>
+          <div class="contacts">
+            <span>helpline@paygine.net</span>
+            <span>+7 800 250 78 80</span>
+          </div>
+        </section>
+
+        <section class="faq">
+          <h2 class="h28">Часто задаваемые вопросы</h2>
+          <div class="accordion" id="accordion"></div>
+        </section>
+
+        <div class="cards">
+          <div class="card">Инструкция по работе с ЛК <span class="ic">↗</span></div>
+          <div class="card">API для разработчиков <span class="ic">↗</span></div>
+        </div>
+
+        <section class="ask" id="ask">
+          <h2>Не нашли свой вопрос?&nbsp; Можете задать его тут</h2>
+          <form class="form" id="form" novalidate>
+            <div class="field" id="field">
+              <textarea id="q" rows="1" placeholder="Не могу изменить номер телефона в профиле" aria-label="Ваш вопрос"></textarea>
+            </div>
+            <div class="err" id="err">Введите сообщение</div>
+            <button class="submit" type="submit">Задать вопрос</button>
+          </form>
+          <div class="sent">
+            <h2 style="display:block;font-size:28px;font-weight:600;margin:0">Сообщение отправлено</h2>
+            <p>Ответим вам на почту в ближайшее время</p>
+            <button class="again" type="button" id="again">Задать новый вопрос</button>
+          </div>
+        </section>
+      </div>
+    </div>
+    </section>
+
+    <section class="screen" id="screen-order">
+      <div class="order" id="orderScreen">
+        <div class="order-inner">
+
+          <!-- EMPTY STATE (Без товаров) -->
+          <div class="order-empty">
+            <div class="order-topwrap">
+              <div class="order-titles">
+                <span class="order-h1">Новый заказ</span>
+                <span class="order-sub">7925 · ИП Иванова Мария Петровна
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </div>
+              <button class="order-seg" type="button">
+                <span class="l">Заказ:</span> <b>Без товаров</b>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
+            <div class="oe-card">
+              <div class="oe-amount"><input class="oe-amount-in" type="text" size="12" placeholder="Сумма заказа" aria-label="Сумма заказа"><span class="oe-rub">₽</span></div>
+              <div class="oe-fields">
+                <label class="ofield"><input type="text" placeholder="Номер заказа"></label>
+                <label class="ofield"><input type="text" placeholder="Описание"></label>
+              </div>
+            </div>
+            <button class="order-submit" type="button">Создать заказ</button>
+          </div>
+
+          <!-- FULL STATE (С товарами) -->
+          <div class="order-full">
+            <div class="order-topwrap">
+              <div class="order-titles">
+                <span class="order-h1">Новый заказ</span>
+                <span class="order-sub">7925 · ИП Иванова Мария Петровна
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </div>
+              <button class="order-seg" type="button">
+                <span class="l">Заказ:</span> <b>С товарами</b>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
+
+            <div class="order-cols">
+              <!-- left column -->
+              <div class="order-left">
+                <div class="ol-h heading">Заказ</div>
+                <label class="ofield"><input type="text" placeholder="№ Заказа"></label>
+                <label class="ofield"><input type="text" placeholder="Описание"></label>
+                <label class="ofield"><input type="text" placeholder="Email для квитанции"></label>
+
+                <div class="ol-reg">
+                  <div class="ol-row">
+                    <span class="ol-h">Регулярные платежи</span>
+                    <button class="toggle on" type="button" aria-label="Регулярные платежи"></button>
+                  </div>
+                  <div class="ol-selects">
+                    <div class="ofield select">Периодичность списаний <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
+                    <div class="ofield select">Период <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
+                    <div class="ofield select">Напоминание об оплате <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
+                  </div>
+                  <div class="ol-retry">
+                    <div class="ol-h2">Повторять при неуспехе</div>
+                    <div class="ol-stepline">
+                      <span>Сколько дней подряд</span>
+                      <span class="stepper"><button class="minus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10h10"/></svg></button><span class="val">1</span><button class="plus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 5v10M5 10h10"/></svg></button></span>
+                    </div>
+                    <div class="ol-stepline">
+                      <span>Кол-во сообщений в день</span>
+                      <span class="stepper"><button class="minus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10h10"/></svg></button><span class="val">3</span><button class="plus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 5v10M5 10h10"/></svg></button></span>
+                    </div>
+                  </div>
+                  <div class="ol-row">
+                    <span class="ol-h">Продолжать после ошибок</span>
+                    <button class="toggle on" type="button" aria-label="Продолжать после ошибок"></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- right column -->
+              <div class="order-right">
+                <div class="or-title">Позиции</div>
+
+                <!-- desktop table -->
+                <div class="or-table">
+                  <div class="ot-head">
+                    <div>Наименование</div><div>НДС</div><div class="r">Цена, ₽</div><div class="c">Кол-во</div><div class="r">Сумма, ₽</div><div></div>
+                  </div>
+                  <div class="ot-row">
+                    <div class="ot-cell"><div class="ot-chip"><input class="nm" type="text" value="Мотокоса бензиновая Oasis GT TB-2500N 3.3 л.с."></div></div>
+                    <div class="ot-cell"><div class="ot-chip"><span class="nm">12%</span><span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div></div>
+                    <div class="ot-cell"><div class="ot-chip r"><input class="pr" type="text" value="7 090,00"></div></div>
+                    <div class="ot-qty"><span class="stepper"><button class="minus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10h10"/></svg></button><span class="val">1</span><button class="plus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 5v10M5 10h10"/></svg></button></span></div>
+                    <div class="ot-sum">7 090,00</div>
+                    <div class="ot-del"><button type="button" aria-label="Удалить"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>
+                  </div>
+                  <div class="ot-row">
+                    <div class="ot-cell"><div class="ot-chip"><input class="nm" type="text" value="Перчатки садовые"></div></div>
+                    <div class="ot-cell"><div class="ot-chip"><span class="nm">Не облагается</span><span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div></div>
+                    <div class="ot-cell"><div class="ot-chip r"><input class="pr" type="text" value="54,00"></div></div>
+                    <div class="ot-qty"><span class="stepper"><button class="minus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10h10"/></svg></button><span class="val">2</span><button class="plus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 5v10M5 10h10"/></svg></button></span></div>
+                    <div class="ot-sum">108,00</div>
+                    <div class="ot-del"><button type="button" aria-label="Удалить"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>
+                  </div>
+                  <div class="ot-row">
+                    <div class="ot-cell"><div class="ot-chip"><input class="nm" type="text" value="Наушники защитные Patriot EPM-6"></div></div>
+                    <div class="ot-cell"><div class="ot-chip"><span class="nm">20%</span><span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div></div>
+                    <div class="ot-cell"><div class="ot-chip r"><input class="pr" type="text" value="477,00"></div></div>
+                    <div class="ot-qty"><span class="stepper"><button class="minus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10h10"/></svg></button><span class="val">2</span><button class="plus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 5v10M5 10h10"/></svg></button></span></div>
+                    <div class="ot-sum">954,00</div>
+                    <div class="ot-del"><button type="button" aria-label="Удалить"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button></div>
+                  </div>
+                </div>
+
+                <!-- mobile cards -->
+                <div class="or-cards">
+                  <div class="ocard">
+                    <div class="nm">Мотокоса бензиновая Oasis GT TB-2500N 3.3 л.с.</div>
+                    <div class="nds">НДС 12%</div>
+                    <div class="row"><span class="sm">7 090 ₽</span><span class="x"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span><span class="sm">1</span><span class="tot">7 090 ₽</span></div>
+                  </div>
+                  <div class="ocard">
+                    <div class="nm">Перчатки садовые</div>
+                    <div class="nds">НДС Не облагается</div>
+                    <div class="row"><span class="sm">54 ₽</span><span class="x"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span><span class="sm">2</span><span class="tot">108 ₽</span></div>
+                  </div>
+                  <div class="ocard">
+                    <div class="nm">Наушники защитные Patriot EPM-6</div>
+                    <div class="nds">НДС 20%</div>
+                    <div class="row"><span class="sm">477 ₽</span><span class="x"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span><span class="sm">2</span><span class="tot">954 ₽</span></div>
+                  </div>
+                </div>
+
+                <div class="or-foot">
+                  <button class="or-add" type="button" id="orderAdd">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Добавить позицию
+                  </button>
+                  <div class="or-total"><span class="cnt">3 позиции</span><span class="dv"></span><span class="sum">19 250 ₽</span></div>
+                  <button class="order-submit" type="button">Создать заказ</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- mobile fixed summary bar -->
+        <div class="order-mbar">
+          <div class="omb-total"><span class="cnt">3 позиции</span><span class="sum">19 250 ₽</span></div>
+          <button class="order-submit" type="button">Создать заказ</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-payments">
+      <div class="pay">
+        <div class="pay-head">
+          <div class="pay-tabs">
+            <button class="pay-tab active" type="button" data-ptab="orders">Заказы</button>
+            <button class="pay-tab" type="button" data-ptab="ops">Операции</button>
+          </div>
+          <div class="pay-actions">
+            <button class="pay-search" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span class="rl">Поиск</span></button>
+            <button class="pay-report" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 20h14"/></svg><span class="rl">Выгрузить отчёт</span></button>
+          </div>
+        </div>
+        <div class="pay-filters" id="payFilters"></div>
+
+        <div class="pay-table">
+          <div class="ptrow pt-head">
+            <div id="payColId">ID заказа</div>
+            <div>Создана</div>
+            <div class="r">Сумма, ₽</div>
+            <div>Статус</div>
+            <div>Сектор</div>
+            <div>Описание заказа</div>
+            <div>Номер заказа в системе клиента</div>
+          </div>
+          <div class="pt-body" id="payBody"></div>
+        </div>
+        <div class="pay-cards" id="payCards"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-order-detail">
+      <div class="od">
+        <div class="od-col">
+          <div class="od-head">
+            <button class="od-back" type="button" data-screen="payments">
+              <svg class="bk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+              <span class="od-id">ID <span id="odId">1245135151</span></span>
+              <span class="od-copy"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M15 9V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h5"/></svg></span>
+            </button>
+            <span class="od-date" id="odDate">Создан 27 ноября 12:52</span>
+          </div>
+
+          <div class="od-panel st-wait" id="odPanel">
+            <div class="od-amt-row">
+              <div class="od-amt" id="odAmt">3 200 ₽</div>
+              <div class="od-status" id="odStatus"><span class="dot wait"></span><span id="odStatusText">Ожидает оплаты</span></div>
+            </div>
+            <div class="od-linkwrap">
+              <div class="od-linktitles">
+                <div><span class="t">Ссылка на оплату</span><span class="d">Скопировать ссылку</span></div>
+                <div><span class="t">&nbsp;</span><span class="d">Отправить ссылку на эл. почту или по смс</span></div>
+              </div>
+              <div class="od-fields">
+                <div class="od-field">
+                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></span>
+                  <span class="ft">https://paygine/myshaurma/payment_1.ru</span>
+                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 7l9 7 9-7"/></svg></span>
+                </div>
+                <div class="od-field">
+                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 7l9 7 9-7"/></svg></span>
+                  <span class="ft ph">Эл. почта получателя</span>
+                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="od-sec">
+            <h3>Подробности</h3>
+            <div class="od-drow"><span class="k">Описание</span><span class="v" id="odDesc">Майка 42 S белый 1 шт. Шорты 44 M красный 1 шт</span></div>
+            <div class="od-drow"><span class="k">№ Заказа</span><span class="v" id="odNum">856765</span></div>
+            <div class="od-drow"><span class="k">Сектор</span><span class="v" id="odSector">6238 • ИП Василенко Антонина Евгеньевна</span></div>
+            <span class="od-more">Подробнее <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </div>
+
+          <div class="od-sec">
+            <h3>Операции</h3>
+            <div class="od-oprow"><span class="opdot"></span><span class="opname">Заказ создан</span><span class="optime" id="odOpTime">27 ноября 12:52</span></div>
+          </div>
+
+          <div class="od-sec">
+            <h3>Позиции <span class="od-poscount">2</span></h3>
+            <div class="od-postable">
+              <div class="od-pos-h">
+                <div>Товар или услуга</div><div class="r">Цена, ₽</div><div></div><div class="r">Сумма, ₽</div>
+              </div>
+              <div class="od-pos-r">
+                <div class="nm"><b>Майка 42 S белый</b><span>НДС не облагается</span></div>
+                <div class="pr">1 200,00</div>
+                <div class="qt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>1</div>
+                <div class="pr">1 200,00</div>
+              </div>
+              <div class="od-pos-r">
+                <div class="nm"><b>Шорты 44 M красный</b><span>НДС 20%</span></div>
+                <div class="pr">2 000,00</div>
+                <div class="qt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>1</div>
+                <div class="pr">2 000,00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-employees">
+      <div class="emp">
+        <div class="emp-col">
+          <div class="emp-head">
+            <div class="emp-titlerow">
+              <div class="emp-title"><h1>Сотрудники</h1><span class="cnt">3</span></div>
+              <button class="emp-create" type="button" id="empCreate"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M3 10h14"/></svg>Создать</button>
+            </div>
+            <button class="emp-filter" type="button"><span class="l">Сектор:</span> <b>Все</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          </div>
+          <div class="emp-list" id="empList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-sectors">
+      <div class="sec" id="secRoot">
+        <div class="sec-listview">
+          <div class="sec-lhead">
+            <div class="sec-title">Секторы <span class="cnt">12</span></div>
+            <div class="sec-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input class="sec-search-in" type="text" id="secSearch" placeholder="Поиск"></div>
+          </div>
+          <div class="sec-list" id="secList"></div>
+          <div class="sec-empty" id="secEmpty" hidden>Ничего не найдено</div>
+        </div>
+
+        <div class="sec-scrim" id="secScrim"></div>
+        <aside class="secpanel" id="secPanel" aria-label="Сектор">
+          <div class="secpanel-scroll">
+          <div class="secpanel-head">
+            <div class="sec-org">
+              <span class="lbl" id="secCode">Сектор 7925</span>
+              <span class="name" id="secName">ИП Иванова Мария Петровна</span>
+            </div>
+            <button class="sec-pclose" id="secClose" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+          <div class="sec-fields">
+            <div class="sf">
+              <span class="k">UUID сектора</span>
+              <span class="v"><span class="tx">d553932b-549a-4a2a-9d19-8ac74eac55f8</span><span class="cp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M15 9V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h5"/></svg></span></span>
+            </div>
+            <div class="sf">
+              <span class="k">Пароль для подписи</span>
+              <span class="v"><span class="tx">••••••••••••••</span><span class="cp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M15 9V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h5"/></svg></span></span>
+            </div>
+            <div class="sf">
+              <span class="k">E-mail для отчётов</span>
+              <span class="v"><span class="tx">nastya.morozova@yandex.ru</span></span>
+            </div>
+            <div class="sf">
+              <span class="k">Остаток на счете выплат</span>
+              <span class="v"><span class="tx">120 ₽</span></span>
+            </div>
+            <div class="sf">
+              <span class="k">Остаток на счете на конец операционного дня</span>
+              <span class="v"><span class="tx">5 120 ₽</span></span>
+            </div>
+          </div>
+
+          <div>
+            <div class="sec-acc" id="secAcc">
+              <span class="t">Квитанция для плательщика</span>
+              <span class="chev"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+            </div>
+            <div class="sec-acc-body" id="secAccBody">
+              <div class="inner">
+                <div class="sf"><span class="k">Наименование</span><span class="v"><span class="tx">ИП Иванова Мария Петровна</span></span></div>
+                <div class="sf"><span class="k">ИНН</span><span class="v"><span class="tx">7736207543</span></span></div>
+                <div class="sf"><span class="k">Телефон поддержки</span><span class="v"><span class="tx">+7 800 250 78 80</span></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-notif">
+            <h3>Настройка уведомлений</h3>
+            <div class="sec-nrow">
+              <span class="lab">E-mail для уведомлений по операциям</span>
+              <button class="add" type="button" aria-label="Добавить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M3 10h14"/></svg></button>
+            </div>
+            <div class="sec-nrow">
+              <span class="lab">URL для уведомлений по операциям</span>
+              <button class="add" type="button" aria-label="Добавить"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M3 10h14"/></svg></button>
+            </div>
+          </div>
+
+          </div>
+          <button class="sec-edit" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M15 4l5 5-11 11H4v-5z"/></svg>
+            Изменить
+          </button>
+        </aside>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Панель сотрудника -->
+<div class="emp-scrim" id="empScrim"></div>
+<aside class="emppanel" id="empPanel" aria-label="Сотрудник">
+  <div class="epd-top">
+    <div class="epd-head">
+      <div class="epd-titlerow">
+        <span class="epd-title" id="epdName">dmitry.market.manager</span>
+        <button class="ep-close" id="epdClose" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="epd-mail"><span id="epdMail">@gmail.com</span> · Скопировать почту</div>
+    </div>
+    <div>
+      <div class="epd-acc-head">
+        <span class="t">Доступы <span class="c">1</span></span>
+        <button class="epd-add" type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M3 10h14"/></svg>Добавить</button>
+      </div>
+      <div class="epd-item">
+        <div class="info">
+          <span class="sname" id="epdSector">7923 · ИП Смирнов Денис Сергеевич</span>
+          <div class="rrow"><span class="emp-role" id="epdRole"></span><span class="lvl" id="epdLvl">Полный</span></div>
+        </div>
+        <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </div>
+    </div>
+  </div>
+  <button class="ep-btn ghost" type="button">Заблокировать сотрудника</button>
+</aside>
+
+<!-- Панель Новый сотрудник -->
+<aside class="emppanel" id="empNew" aria-label="Новый сотрудник">
+  <div class="epn-top">
+    <div class="epn-htitle">Новый сотрудник
+      <button class="ep-close" id="empNewClose" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="epn-fields">
+      <div class="epn-fg">
+        <div class="epn-field"><div class="col"><span class="lab">E-mail</span><span class="val">user4234@mail.ru</span></div></div>
+        <span class="epn-hint">На него отправим ссылку для входа в личный кабинет</span>
+      </div>
+      <div class="epn-fg">
+        <div class="epn-field"><div class="col"><span class="lab">Сектор</span><span class="val">7923 · ИП Смирнов Денис Сергеевич</span></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <span class="epn-hint">Потом поменять будет нельзя</span>
+      </div>
+    </div>
+    <div class="epn-sec">
+      <h3>Уровень доступа</h3>
+      <div class="epn-levels">
+        <button class="epn-lvl on" type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 2l4 4-9 9H3v-4z"/></svg>Полный</button>
+        <button class="epn-lvl" type="button"><svg viewBox="0 0 20 20" fill="none" stroke="#3BC419" stroke-width="1.5" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/></svg>Частичный</button>
+      </div>
+    </div>
+    <div class="epn-can">
+      <span class="h">Сотрудник сможет:</span>
+      <span class="li">Просматривать заказы и операции</span>
+      <span class="li">Создавать заказы и проводить возвраты</span>
+      <span class="li">Отправлять квитанции по операциям</span>
+      <span class="li">Выгружать списки заказов в Excel</span>
+    </div>
+  </div>
+  <button class="ep-btn dark" type="button">Создать</button>
+</aside>
+
+<!-- Настройки (панель профиля) -->
+<div class="set-scrim" id="setScrim"></div>
+<aside class="setpanel" id="setPanel" aria-label="Настройки">
+  <div class="set-head">
+    <div class="info">
+      <span class="nm">alexander.sokolova</span>
+      <span class="ph">+7 911 833 7807</span>
+    </div>
+    <button class="set-close" id="setClose" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+
+  <div class="set-list">
+    <div class="set-acc" data-setacc>
+      <div class="set-item">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+        <span class="lb">Изменить пароль</span>
+        <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+      </div>
+      <div class="set-body"><div class="inner">
+        <div class="set-pf">
+          <div class="col"><span class="lab">Старый пароль</span><input type="password" value="password1234"></div>
+          <button class="eye" type="button" data-eye aria-label="Показать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg></button>
+        </div>
+        <div>
+          <div class="set-pf">
+            <div class="col"><span class="lab">Новый пароль</span><input type="text" placeholder="Новый пароль"></div>
+            <button class="eye" type="button" data-eye aria-label="Показать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+          <div class="set-hint" style="margin-top:8px">Минимум 12 знаков с большими и маленькими буквами, символами и цифрами</div>
+        </div>
+        <div class="set-pf">
+          <div class="col"><span class="lab">Повторите новый</span><input type="password" placeholder="Повторите новый"></div>
+          <button class="eye" type="button" data-eye aria-label="Показать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg></button>
+        </div>
+        <div class="set-pbtns"><button class="cancel" type="button" data-setacc-close>Отмена</button><button class="save" type="button">Изменить</button></div>
+      </div></div>
+    </div>
+
+    <div class="set-acc" data-setacc>
+      <div class="set-item">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg></span>
+        <span class="lb">Отображение разделов</span>
+        <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+      </div>
+      <div class="set-body"><div class="inner">
+        <div class="set-sections" id="setSections"></div>
+      </div></div>
+    </div>
+
+    <div class="set-divider"></div>
+
+    <div class="set-item">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M4 12h11M4 17h7"/><path d="M18 8v9M18 17l-2.5-2.5M18 17l2.5-2.5"/></svg></span>
+      <span class="lb">Операции всегда раскрыты</span>
+      <button class="set-toggle on" type="button" aria-label="Операции всегда раскрыты"></button>
+    </div>
+    <div class="set-item">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+      <span class="lb">Секунды в датах</span>
+      <button class="set-toggle on" type="button" aria-label="Секунды в датах"></button>
+    </div>
+    <div class="set-item">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9S9.5 5.5 12 3z"/></svg></span>
+      <span class="lb">Язык</span>
+      <span class="lang">Русский <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+    </div>
+    <div class="set-item logout" id="setLogout" style="cursor:pointer">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg></span>
+      <span class="lb">Выйти</span>
+    </div>
+  </div>
+
+  <div class="set-survey">
+    <span class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.3 2.5c-.8.3-1.3.9-1.3 1.7"/><circle cx="11.8" cy="16.6" r="1" fill="currentColor" stroke="none"/></svg></span>
+    <div>
+      <div class="st">Что бы вы улучшили в Personal Area?</div>
+      <div class="sd">Пройдите небольшой тест и предложите свои идеи по улучшению ЛК</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Добавление товара -->
+<div class="addprod-scrim" id="addProdScrim"></div>
+<div class="addprod" id="addProd" role="dialog" aria-label="Добавление товара">
+  <div class="ap-head">
+    <span>Добавление товара</span>
+    <button class="ap-close" id="addProdClose" type="button" aria-label="Закрыть"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="ap-top">
+    <label class="ofield"><input type="text" placeholder="Наименование"></label>
+    <div class="ap-price">
+      <label class="ofield"><input type="text" placeholder="Цена"></label>
+      <span class="stepper"><button class="minus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10h10"/></svg></button><span class="val">1</span><button class="plus" type="button"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 5v10M5 10h10"/></svg></button></span>
+    </div>
+  </div>
+  <div class="ap-nds">
+    <div class="ap-nds-title">НДС</div>
+    <div class="ap-chips">
+      <button class="ap-chip on" type="button">Не облагается</button>
+      <button class="ap-chip" type="button">22%</button>
+      <button class="ap-chip" type="button">11%</button>
+      <button class="ap-chip" type="button">0%</button>
+      <button class="ap-chip" type="button">Расч. 10/110</button>
+      <button class="ap-chip" type="button">Расч. 20/120</button>
+    </div>
+  </div>
+  <div class="ap-summa"><span>Сумма</span><b>0 ₽</b></div>
+  <button class="order-submit" id="addProdSubmit" type="button">Добавить товар</button>
+</div>
+
+<!-- Операция (боковая панель) -->
+<div class="oppanel-scrim" id="opScrim"></div>
+<aside class="oppanel" id="opPanel" aria-label="Операция">
+  <div class="op-inner">
+    <div class="op-top">
+      <div class="op-head">
+        <div class="op-htitles">
+          <span class="op-title">Операция <span id="opId">10198975</span> <span class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></span>
+          <span class="op-date" id="opDate">27 ноября 2026, 12:53</span>
+        </div>
+        <button class="op-close" id="opClose" type="button" aria-label="Закрыть"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="op-amt" id="opAmt">Оплата 5 440 ₽</div>
+      <div class="op-status">
+        <div class="st"><span class="d" id="opDot"></span><span id="opStatus">Успешно</span></div>
+        <span class="sub" id="opStatusSub">Операция одобрена эмитентом</span>
+      </div>
+      <button class="op-btn" type="button">Отправить документы</button>
+    </div>
+
+    <div class="op-sec">
+      <h3>Основные</h3>
+      <div class="op-r"><span class="k">Комиссия</span><span class="v">0 ₽</span></div>
+      <div class="op-r"><span class="k">Сектор</span><span class="v" id="opSector">5654 · ИП Иванов Иван Иванович</span></div>
+      <div class="op-r"><span class="k">Terminal ID</span><span class="v" id="opTermId">10198975</span></div>
+      <div class="op-r"><span class="k">Оригинальная операция</span><span class="v">5654 · ИП Иванов Иван Иванович</span></div>
+    </div>
+
+    <div class="op-sec big">
+      <h3>Заказ</h3>
+      <div class="op-r"><span class="k">ID заказа</span><span class="v" id="opOrderId">12980665</span></div>
+      <div class="op-r"><span class="k">Номер заказа</span><span class="v">REPLENISHMENT_3db2349b-c4c3-435e-8218-abb88e73c7b7</span></div>
+      <div class="op-r"><span class="k">Описание заказа</span><span class="v">Пополнение баланса карты</span></div>
+      <div class="op-r"><span class="k">Фискальный статус</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">Номер договора</span><span class="v">—</span></div>
+    </div>
+
+    <div class="op-sec big">
+      <h3 class="h24">Плательщик</h3>
+      <div class="op-r"><span class="k">Инициатор</span><span class="v">username635384323</span></div>
+      <div class="op-r"><span class="k">Имя держателя</span><span class="v">UNKNOWN NAME</span></div>
+      <div class="op-r"><span class="k">Номер карты плательщика</span><span class="v">5406 16•• •••• 0041</span></div>
+      <div class="op-r"><span class="k">Наименование банка эмитента плательщика</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">IP адрес плательщика</span><span class="v">194.32.96.1</span></div>
+      <div class="op-r"><span class="k">Terminal ID</span><span class="v">POS_1</span></div>
+      <div class="op-r"><span class="k">Тип операции</span><span class="v">P2PTRANSFER</span></div>
+      <div class="op-r"><span class="k">Статус операции</span><span class="v">Approved</span></div>
+      <div class="op-r"><span class="k">Страна карты отправителя</span><span class="v">RU</span></div>
+      <div class="op-r"><span class="k">Email</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">Телефон</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">Имя</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">Фамилия</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">Отчество</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">b2pUserPay</span><span class="v">B2PUSERP2PIN</span></div>
+    </div>
+
+    <div class="op-sec big">
+      <h3 class="h24">Получатель</h3>
+      <div class="op-r"><span class="k">Номер карты получателя</span><span class="v">220441•• •••• 8585</span></div>
+      <div class="op-r"><span class="k">Наименование банка эмитента плательщика</span><span class="v">—</span></div>
+      <div class="op-r"><span class="k">Страна карты получателя</span><span class="v">RU</span></div>
+      <div class="op-r"><span class="k">Токен карты</span><span class="v">ae9ee5a3-f21c-4be4-8ee6-97f91bdd848a</span></div>
+    </div>
+  </div>
+</aside>
+
+<aside class="addwidget" id="addwidget" aria-label="Добавить виджет">
+  <div class="aw-head">
+    <h3>Добавить виджет</h3>
+    <button class="icon-btn" id="awClose" type="button" aria-label="Закрыть"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="aw-card" data-add="qorder">
+    <div class="aw-prev">
+      <div style="font-weight:600;font-size:11px">Быстрый заказ</div>
+      <div style="font-size:18px;font-weight:700;margin:8px 0 4px">14 599,99 ₽</div>
+      <div style="color:#adb3b6">1255-01</div>
+      <div style="background:#f5f5f5;border-radius:4px;text-align:center;padding:6px;margin-top:8px;font-size:10px">Создать заказ</div>
+    </div>
+    <div class="aw-name">Быстрый заказ</div>
+    <div class="aw-desc">Экономьте время с готовыми настройками заказа</div>
+  </div>
+  <div class="aw-card" data-add="avg">
+    <div class="aw-prev"><div style="font-weight:600;font-size:11px">Средний чек</div><img src="img/chart-avg.png" alt="" style="margin-top:6px"></div>
+    <div class="aw-name">Средний чек</div>
+    <div class="aw-desc">Будьте в курсе, сколько в среднем приносит каждый заказ</div>
+  </div>
+  <div class="aw-card" data-add="revenue">
+    <div class="aw-prev"><div style="font-weight:600;font-size:11px">Выручка</div><img src="img/chart-revenue.png" alt="" style="margin-top:6px"></div>
+    <div class="aw-name">Выручка</div>
+    <div class="aw-desc">Следите за выручкой по времени суток</div>
+  </div>
+  <div class="aw-card" data-add="orders">
+    <div class="aw-prev"><div style="font-weight:600;font-size:11px">Заказы</div><img src="img/chart-orders.png" alt="" style="margin-top:6px"></div>
+    <div class="aw-name">Заказы</div>
+    <div class="aw-desc">Разбивка заказов по статусам</div>
+  </div>
+</aside>
+
+<nav class="tabbar" aria-label="Навигация">
+  <div class="tab-pill">
+    <button class="tab" type="button">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(3 2.25)"><path fill-rule="nonzero" d="M17.56 7.939 10.06 0.439C9.779 0.158 9.398 0 9 0C8.602 0 8.221 0.158 7.94 0.439L0.44 7.939C0.3 8.078 0.189 8.243 0.113 8.425C0.038 8.608 0 8.803 0 9V18C0 18.199 0.079 18.39 0.22 18.531C0.36 18.671 0.551 18.75 0.75 18.75H6.75C6.949 18.75 7.14 18.671 7.28 18.531C7.421 18.39 7.5 18.199 7.5 18V12.75H10.5V18C10.5 18.199 10.579 18.39 10.72 18.531C10.86 18.671 11.051 18.75 11.25 18.75H17.25C17.449 18.75 17.64 18.671 17.78 18.531C17.921 18.39 18 18.199 18 18V9C18 8.803 17.962 8.608 17.887 8.425C17.811 8.243 17.7 8.078 17.56 7.939ZM16.5 17.25H12V12C12 11.801 11.921 11.611 11.78 11.47C11.64 11.329 11.449 11.25 11.25 11.25H6.75C6.551 11.25 6.36 11.329 6.22 11.47C6.079 11.611 6 11.801 6 12V17.25H1.5V9L9 1.5L16.5 9V17.25Z"/></g></svg></span>
+      <span>Главная</span>
+    </button>
+    <button class="tab" type="button">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="nonzero" transform="translate(3 3)" d="M16.5 0H1.5C1.102 0 0.721 0.158 0.439 0.439C0.158 0.721 0 1.102 0 1.5V16.5C0 16.898 0.158 17.279 0.439 17.561C0.721 17.842 1.102 18 1.5 18H16.5C16.898 18 17.279 17.842 17.561 17.561C17.842 17.279 18 16.898 18 16.5V1.5C18 1.102 17.842 0.721 17.561 0.439C17.279 0.158 16.898 0 16.5 0ZM16.5 16.5H1.5V1.5H16.5V16.5Z"/><path fill-rule="nonzero" transform="translate(7.5 7.5)" d="M9 4.5C9 4.699 8.921 4.89 8.78 5.03C8.64 5.171 8.449 5.25 8.25 5.25H5.25V8.25C5.25 8.449 5.171 8.64 5.03 8.78C4.89 8.921 4.699 9 4.5 9C4.301 9 4.11 8.921 3.97 8.78C3.829 8.64 3.75 8.449 3.75 8.25V5.25H0.75C0.551 5.25 0.36 5.171 0.22 5.03C0.079 4.89 0 4.699 0 4.5C0 4.301 0.079 4.11 0.22 3.97C0.36 3.829 0.551 3.75 0.75 3.75H3.75V0.75C3.75 0.551 3.829 0.36 3.97 0.22C4.11 0.079 4.301 0 4.5 0C4.699 0 4.89 0.079 5.03 0.22C5.171 0.36 5.25 0.551 5.25 0.75V3.75H8.25C8.449 3.75 8.64 3.829 8.78 3.97C8.921 4.11 9 4.301 9 4.5Z"/></svg></span>
+      <span>Заказ</span>
+    </button>
+    <button class="tab active" type="button">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path transform="translate(3 11)" d="M18 0V10H0V0Z" stroke-linejoin="round"/><path transform="matrix(0 -1 1 0 4 7)" d="M0 0V16"/><path transform="matrix(0 -1 1 0 6 3)" d="M0 0V12"/></svg></span>
+      <span>Платежи</span>
+    </button>
+  </div>
+  <button class="tab-menu" type="button" id="tabMenu" aria-label="Меню">
+    <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(3 6)"><path fill-rule="nonzero" d="M0 12V10H18V12H0ZM0 7V5H18V7H0ZM0 2V0H18V2H0Z"/></g></svg></span>
+  </button>
+</nav>
+
+<div class="menu-scrim" id="menuScrim"></div>
+<div class="menusheet" id="menusheet" role="dialog" aria-label="Разделы">
+  <div class="menu-card">
+    <div class="menu-logo">
+      <svg viewBox="0 0 118 32" fill="#37e6e9" xmlns="http://www.w3.org/2000/svg" aria-label="Paygine">
+        <path d="M76.811 7.149V23.969H81.093V7.149H76.811Z"/>
+        <path d="M77.025 4.724C77.515 5.213 78.157 5.458 78.952 5.458C79.727 5.458 80.359 5.213 80.848 4.724C81.358 4.213 81.613 3.553 81.613 2.745C81.613 1.915 81.348 1.255 80.818 0.766C80.308 0.255 79.696 0 78.983 0C78.208 0 77.566 0.255 77.056 0.766C76.546 1.277 76.292 1.947 76.292 2.777C76.292 3.564 76.536 4.213 77.025 4.724Z"/>
+        <path d="M84.487 23.969V7.149H88.493L88.707 9.096C89.156 8.522 89.665 8.075 90.236 7.756C90.827 7.415 91.419 7.181 92.010 7.054C92.622 6.926 93.172 6.862 93.661 6.862C95.211 6.862 96.414 7.213 97.270 7.915C98.147 8.618 98.769 9.564 99.136 10.756C99.523 11.926 99.717 13.235 99.717 14.682V23.969H95.435V15.256C95.435 14.746 95.394 14.235 95.313 13.724C95.231 13.214 95.078 12.745 94.854 12.320C94.650 11.894 94.355 11.554 93.967 11.299C93.580 11.043 93.070 10.916 92.438 10.916C91.623 10.916 90.940 11.128 90.389 11.554C89.839 11.979 89.431 12.554 89.166 13.277C88.901 14.001 88.768 14.799 88.768 15.671V23.969H84.487Z"/>
+        <path fill-rule="evenodd" d="M110.373 24.193C108.681 24.193 107.243 23.842 106.061 23.140C104.878 22.437 103.971 21.448 103.339 20.171C102.707 18.873 102.391 17.363 102.391 15.639C102.391 13.894 102.717 12.373 103.370 11.075C104.022 9.756 104.940 8.724 106.122 7.979C107.325 7.235 108.742 6.862 110.373 6.862C111.596 6.862 112.667 7.075 113.584 7.501C114.522 7.926 115.307 8.522 115.939 9.288C116.591 10.054 117.071 10.948 117.376 11.969C117.703 12.969 117.855 14.054 117.835 15.224C117.835 15.522 117.825 15.809 117.804 16.086C117.784 16.363 117.743 16.639 117.682 16.916H106.642C106.703 17.554 106.877 18.139 107.162 18.671C107.447 19.203 107.845 19.629 108.355 19.948C108.885 20.246 109.537 20.395 110.312 20.395C110.822 20.395 111.291 20.342 111.719 20.235C112.147 20.108 112.514 19.916 112.820 19.661C113.125 19.405 113.340 19.108 113.462 18.767H117.682C117.417 20.022 116.918 21.054 116.184 21.863C115.470 22.672 114.604 23.267 113.584 23.650C112.565 24.012 111.494 24.193 110.373 24.193ZM106.734 13.788H113.737C113.717 13.214 113.574 12.682 113.309 12.192C113.064 11.682 112.687 11.277 112.177 10.979C111.688 10.660 111.056 10.501 110.281 10.501C109.507 10.501 108.854 10.660 108.324 10.979C107.814 11.299 107.427 11.714 107.162 12.224C106.917 12.714 106.775 13.235 106.734 13.788Z"/>
+        <path d="M42.333 31.240C43.515 31.580 44.728 31.750 45.972 31.750C47.562 31.750 48.888 31.506 49.948 31.016C51.028 30.548 51.885 29.867 52.517 28.974C53.169 28.080 53.628 27.005 53.893 25.750C54.178 24.495 54.321 23.101 54.321 21.569V7.175H50.039V15.186C50.039 16.015 49.948 16.813 49.764 17.579C49.601 18.345 49.275 18.984 48.786 19.494C48.296 19.984 47.562 20.228 46.584 20.228C45.829 20.228 45.228 20.090 44.779 19.814C44.331 19.516 43.994 19.133 43.770 18.665C43.546 18.196 43.403 17.686 43.342 17.133C43.281 16.579 43.250 16.026 43.250 15.473V7.175H38.969V16.398C38.969 17.909 39.173 19.260 39.580 20.452C40.009 21.622 40.692 22.548 41.629 23.229C42.567 23.910 43.811 24.250 45.360 24.250C45.952 24.250 46.543 24.186 47.134 24.058C47.725 23.931 48.276 23.729 48.786 23.452C49.316 23.154 49.754 22.761 50.101 22.271V23.165C50.101 24.612 49.713 25.718 48.939 26.484C48.184 27.250 47.022 27.633 45.452 27.633C44.433 27.633 43.505 27.474 42.669 27.154C41.833 26.856 41.089 26.452 40.437 25.942L38.999 29.516C40.039 30.325 41.150 30.899 42.333 31.240Z"/>
+        <path fill-rule="evenodd" d="M73.449 21.859C73.449 16.963 73.449 12.067 73.449 7.171H69.535L69.168 8.863C68.617 8.224 67.955 7.746 67.180 7.427C66.405 7.086 65.518 6.916 64.519 6.916C62.868 6.916 61.492 7.310 60.391 8.097C59.290 8.884 58.464 9.948 57.913 11.288C57.363 12.629 57.088 14.118 57.088 15.757C57.088 17.246 57.332 18.640 57.822 19.938C58.311 21.215 59.086 22.247 60.146 23.034C61.206 23.821 62.582 24.215 64.274 24.215C64.825 24.215 65.396 24.140 65.987 23.991C66.599 23.864 67.180 23.640 67.730 23.321C68.281 23.002 68.739 22.534 69.106 21.917C69.082 22.372 69.094 22.709 69.077 23.182C69.030 24.452 68.860 25.470 68.052 26.428C67.357 27.251 66.131 27.577 64.557 27.577C63.535 27.577 62.605 27.417 61.768 27.098C60.930 26.800 60.184 26.396 59.530 25.885L58.089 29.460C59.131 30.268 60.245 30.843 61.430 31.183C62.616 31.524 63.832 31.694 65.078 31.694C66.672 31.694 68.000 31.449 69.063 30.960C70.146 30.492 71.004 29.811 71.638 28.917C72.292 28.024 72.752 26.949 73.017 25.694C73.282 24.533 73.429 23.256 73.449 21.859ZM67.424 19.555C66.854 19.980 66.120 20.193 65.223 20.193C64.285 20.193 63.530 19.991 62.959 19.587C62.389 19.161 61.981 18.608 61.736 17.927C61.492 17.225 61.369 16.470 61.369 15.661C61.369 14.874 61.481 14.129 61.706 13.427C61.950 12.703 62.358 12.108 62.929 11.640C63.500 11.150 64.275 10.905 65.253 10.905C66.150 10.905 66.884 11.118 67.455 11.544C68.026 11.948 68.454 12.501 68.739 13.203C69.025 13.884 69.168 14.661 69.168 15.533C69.168 16.363 69.025 17.140 68.739 17.863C68.454 18.565 68.016 19.129 67.424 19.555Z"/>
+        <path d="M35.642 7.168V23.970H31.653C31.653 23.970 31.379 22.300 31.299 21.913C30.932 22.530 30.473 22.999 29.923 23.318C29.372 23.637 28.791 23.860 28.180 23.988C27.589 24.137 27.018 24.211 26.467 24.211C24.775 24.211 23.399 23.818 22.339 23.030C21.278 22.243 20.504 21.211 20.014 19.935C19.687 19.066 19.469 18.155 19.361 17.201H23.724C23.779 17.448 23.847 17.689 23.929 17.924C24.174 18.605 24.581 19.158 25.152 19.583C25.723 19.988 26.477 20.190 27.415 20.190C28.312 20.190 29.046 19.977 29.617 19.552C30.208 19.126 30.647 18.562 30.932 17.860C31.218 17.137 31.360 16.360 31.360 15.530C31.360 14.658 31.218 13.881 30.932 13.200C30.647 12.498 30.219 11.945 29.648 11.540C29.077 11.115 28.343 10.902 27.446 10.902C26.467 10.902 25.692 11.147 25.122 11.636C24.551 12.104 24.143 12.700 23.898 13.424C23.876 13.494 23.854 13.565 23.834 13.637H19.447C19.583 12.808 19.803 12.024 20.106 11.285C20.657 9.945 21.482 8.881 22.583 8.094C23.684 7.306 25.060 6.913 26.712 6.913C27.711 6.913 28.598 7.083 29.372 7.423C30.147 7.742 30.810 8.221 31.360 8.860L31.727 7.168H35.642Z"/>
+        <path d="M0 30.278V7.170H4.006L4.220 9.277C4.873 8.447 5.617 7.840 6.453 7.457C7.309 7.074 8.247 6.883 9.266 6.883C10.857 6.883 12.172 7.266 13.211 8.032C14.251 8.798 15.026 9.841 15.536 11.160C15.850 11.929 16.071 12.754 16.199 13.635H11.799C11.772 13.544 11.743 13.452 11.713 13.362C11.468 12.639 11.060 12.064 10.490 11.639C9.939 11.192 9.185 10.968 8.227 10.968C7.370 10.968 6.646 11.192 6.055 11.639C5.464 12.064 5.015 12.628 4.710 13.330C4.404 14.032 4.251 14.788 4.251 15.596C4.251 16.405 4.394 17.160 4.679 17.862C4.985 18.564 5.433 19.128 6.025 19.554C6.636 19.979 7.401 20.192 8.318 20.192C9.277 20.192 10.031 19.969 10.581 19.522C11.132 19.075 11.519 18.511 11.743 17.830C11.810 17.622 11.866 17.413 11.913 17.201H16.231C16.106 18.207 15.864 19.140 15.505 20.001C14.975 21.299 14.170 22.331 13.089 23.097C12.009 23.841 10.663 24.214 9.052 24.214C8.359 24.214 7.707 24.129 7.095 23.958C6.483 23.788 5.943 23.565 5.474 23.288C5.005 22.990 4.608 22.660 4.281 22.299V30.278H0Z"/>
+      </svg>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+  <button class="menu-close" type="button" id="menuClose" aria-label="Закрыть">
+    <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.3 5.71L12 12.01l6.3 6.3-1.41 1.41L10.59 13.4l-6.3 6.3-1.41-1.41 6.3-6.3-6.3-6.3L4.29 4.3l6.3 6.3 6.3-6.3z"/></svg></span>
+  </button>
+</div>
+
+<script>
+  var NAV = [
+    ['Главная', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg>'],
+    ['Новый заказ', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/></svg>'],
+    ['Платежи', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path transform="translate(3 11)" d="M18 0V10H0V0Z" stroke-linejoin="round"/><path transform="matrix(0 -1 1 0 4 7)" d="M0 0V16"/><path transform="matrix(0 -1 1 0 6 3)" d="M0 0V12"/></svg>'],
+    ['Секторы', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path transform="matrix(0 1 -1 0 17 7)" d="M5 0L9.33 2.5V7.5L5 10L0.67 7.5V2.5Z" stroke-linejoin="round"/><circle cx="12" cy="12" r="9.5"/></svg>'],
+    ['QR-static', '<svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(2 2)"><path fill-rule="evenodd" d="M9 20H0v-9h9v9ZM14 20h-3v-3h3v3ZM20 20h-3v-3h3v3ZM2 18h5v-5H2v5ZM17 17h-3v-3h3v3ZM14 14h-3v-3h3v3ZM20 14h-3v-3h3v3ZM9 9H0V0h9v9ZM20 9h-9V0h9v9ZM2 7h5V2H2v5ZM13 7h5V2h-5v5Z"/></g></svg>'],
+    ['Сессии Плайт', '<svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(1.69 1.69)"><path d="M2.047 12.309C2.792 15.396 5.22 17.825 8.308 18.569V20.616C4.113 19.807 0.809 16.503 0 12.309H2.047ZM20.615 12.309C19.806 16.503 16.502 19.807 12.308 20.616V18.569C15.395 17.825 17.823 15.396 18.568 12.309H20.615ZM8.308 2.047C5.22 2.792 2.792 5.221 2.047 8.309H0C0.809 4.114 4.113 0.809 8.308 0V2.047ZM12.308 0C16.502 0.809 19.806 4.114 20.615 8.309H18.568C17.823 5.221 15.395 2.792 12.308 2.047V0Z"/></g></svg>'],
+    ['Выплаты', '<svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(1 1)"><path fill-rule="evenodd" d="M11 0C12.051 0 13.091 0.207 14.062 0.609C15.032 1.011 15.914 1.6 16.657 2.343C17.4 3.086 17.989 3.968 18.391 4.938C18.664 5.599 18.845 6.293 18.935 7H22V22H0V7H3.065C3.155 6.293 3.336 5.599 3.609 4.938C4.011 3.968 4.6 3.086 5.343 2.343C6.086 1.6 6.968 1.011 7.938 0.609C8.909 0.207 9.949 0 11 0ZM2 20H20V9H2V20ZM18.635 15.5H13.9v-2h4.735v2ZM11 2C10.212 2 9.432 2.156 8.704 2.457C7.976 2.759 7.315 3.201 6.758 3.758C6.201 4.315 5.759 4.976 5.457 5.704C5.284 6.122 5.161 6.557 5.086 7H16.914C16.839 6.557 16.716 6.122 16.543 5.704C16.241 4.976 15.799 4.315 15.242 3.758C14.685 3.201 14.024 2.759 13.296 2.457C12.568 2.156 11.788 2 11 2Z"/></g></svg>'],
+    ['Пользователи', '<svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(2 2)"><path fill-rule="evenodd" d="M20 20H0V0h20v20ZM9.999 14.711C7.242 14.711 4.82 16.012 3.323 18h13.352C15.178 16.012 12.756 14.711 9.999 14.711ZM2 16.446C3.884 14.165 6.775 12.711 9.999 12.711C13.225 12.711 16.116 14.167 18 16.45V2H2V16.446ZM10 3.445C12.209 3.445 14 5.236 14 7.445C14 9.654 12.209 11.445 10 11.445C7.791 11.445 6 9.654 6 7.445C6 5.236 7.791 3.445 10 3.445ZM10 5.445C8.895 5.445 8 6.341 8 7.445C8 8.55 8.895 9.445 10 9.445C11.105 9.445 12 8.55 12 7.445C12 6.341 11.105 5.445 10 5.445Z"/></g></svg>'],
+    ['Реестры', '<svg viewBox="0 0 24 24" fill="currentColor"><g transform="translate(2 2)"><path fill-rule="evenodd" d="M7.331 0.35L10.459 4H20V20H0V0H7.031L7.331 0.35ZM2 18H18V6H2V18ZM2 4H7.826L6.112 2H2V4Z"/></g></svg>'],
+    ['Сотрудники', '<svg viewBox="0 0 24 24" fill="none"><path transform="matrix(1 0 0 1 8 2)" d="M4 0C6.209 0 8 1.791 8 4C8 6.209 6.209 8 4 8C1.791 8 0 6.209 0 4C0 1.791 1.791 0 4 0Z" stroke="currentColor" stroke-width="2"/><path transform="matrix(1 0 0 1 1.522 13.826)" d="M10.479 0C15.458 0 19.654 3.34 20.957 7.9H19.07C17.831 4.349 14.453 1.801 10.479 1.801C6.504 1.801 3.127 4.349 1.887 7.9H0C1.303 3.34 5.499 0 10.479 0Z" fill="currentColor"/></svg>']
+  ];
+  var navList = document.getElementById('navList');
+  NAV.forEach(function(n, i){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'nav';
+    if(i === 0) b.dataset.screen = 'home';
+    if(n[0] === 'Новый заказ') b.dataset.screen = 'order';
+    if(n[0] === 'Платежи') b.dataset.screen = 'payments';
+    if(n[0] === 'Секторы') b.dataset.screen = 'sectors';
+    if(n[0] === 'Сотрудники') b.dataset.screen = 'employees';
+    b.innerHTML = '<span class="ic">'+n[1]+'</span><span class="label">'+n[0]+'</span>';
+    navList.appendChild(b);
+  });
+
+  var CHEV = '<svg class="chev" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#282828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  var FAQ = [
+    ['Как сменить банковские реквизиты?',
+     'Скачайте и заполните наш шаблон заявления\nВнесите в него новые реквизиты и укажите дату, с которой они будут действовать\nПодпишите заявление и поставьте печать (если она есть)\nОтсканируйте готовый документ и отправьте его нам с авторизованной почты на helpline@paygine.net'],
+    ['Что делать если не получили ответ на электронную почту?',
+     'Проверьте папку «Спам» и корректность адреса. Если ответа нет в течение 24 часов, продублируйте обращение на helpline@paygine.net или позвоните по +7 800 250 78 80.'],
+    ['Что делать при обнаружении расхождений в поступлении денежных средств?',
+     'Сформируйте выписку за нужный период в разделе «Выплаты» и направьте её вместе с описанием расхождения на helpline@paygine.net — мы проверим операции и вернёмся с ответом.'],
+    ['Как сменить банковские реквизиты?',
+     'Заполните шаблон заявления, укажите новые реквизиты и дату вступления в силу, подпишите и отправьте скан с авторизованной почты на helpline@paygine.net.'],
+    ['Что делать при обнаружении расхождений в поступлении денежных средств?',
+     'Приложите выписку и описание расхождения и отправьте на helpline@paygine.net — специалист сверит поступления и свяжется с вами.'],
+    ['Как создать дополнительные учетные записи?',
+     'Перейдите в раздел «Сотрудники» → «Добавить», укажите email и роль. Приглашение придёт на почту нового пользователя.'],
+    ['Что делать, если не получили Акт об оказанных услугах?',
+     'Акты формируются в начале месяца и доступны в разделе «Реестры». Если документа нет, запросите его на helpline@paygine.net.'],
+    ['Что делать, если не получается провести возврат?',
+     'Убедитесь, что операция не старше срока возврата и на балансе достаточно средств. При ошибке пришлите номер операции на helpline@paygine.net.']
+  ];
+  var acc = document.getElementById('accordion');
+  FAQ.forEach(function(f){
+    var item = document.createElement('div'); item.className = 'item';
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'q';
+    btn.innerHTML = '<span>'+f[0]+'</span>'+CHEV;
+    var ans = document.createElement('div'); ans.className = 'a';
+    var inner = document.createElement('div'); inner.textContent = f[1];
+    ans.appendChild(inner);
+    item.appendChild(btn); item.appendChild(ans); acc.appendChild(item);
+    btn.addEventListener('click', function(){
+      var isOpen = item.classList.contains('open');
+      acc.querySelectorAll('.item.open').forEach(function(o){ o.classList.remove('open'); o.querySelector('.a').style.maxHeight='0px'; });
+      if(!isOpen){ item.classList.add('open'); ans.style.maxHeight = ans.scrollHeight+'px'; }
+    });
+  });
+
+  var q = document.getElementById('q');
+  var field = document.getElementById('field');
+  function grow(){ q.style.height='auto'; q.style.height = q.scrollHeight+'px'; }
+  q.addEventListener('input', function(){ grow(); if(field.classList.contains('error') && q.value.trim()) field.classList.remove('error'); });
+
+  var ask = document.getElementById('ask');
+  document.getElementById('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!q.value.trim()){ field.classList.add('error'); q.focus(); return; }
+    ask.classList.add('done');
+  });
+  document.getElementById('again').addEventListener('click', function(){
+    ask.classList.remove('done'); field.classList.remove('error'); q.value=''; grow(); q.focus();
+  });
+
+  // Menu popup (☰) — grid of all sections
+  var HELP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.2a2.85 2.85 0 1 1 3.6 2.75c-.8.3-1.35.95-1.35 1.8"/><circle cx="12" cy="17.4" r="1.05" fill="currentColor" stroke="none"/></svg>';
+  var SETTINGS_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path transform="matrix(0 1 -1 0 22.5 1.5)" d="M10.5 0L19.593 5.25V15.75L10.5 21L1.407 15.75V5.25Z"/><circle cx="12" cy="12" r="4"/></svg>';
+  var SECTORS_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path transform="matrix(0 1 -1 0 17 7)" d="M5 0L9.33 2.5V7.5L5 10L0.67 7.5V2.5Z" stroke-linejoin="round"/><circle cx="12" cy="12" r="9.5"/></svg>';
+
+  var MENU = [
+    ['Главная', NAV[0][1]],
+    ['Новый заказ', NAV[1][1]],
+    ['Платежи', NAV[2][1]],
+    ['Секторы', SECTORS_ICON],
+    ['QR-static', NAV[3][1]],
+    ['Сессии Плайт', NAV[4][1]],
+    ['Выплаты', NAV[5][1]],
+    ['Пользователи', NAV[6][1]],
+    ['Реестры', NAV[7][1]],
+    ['Сотрудники', NAV[8][1]],
+    ['Поддержка', HELP_ICON, true],
+    ['Настройки', SETTINGS_ICON]
+  ];
+  var menuGrid = document.getElementById('menuGrid');
+  MENU.forEach(function(m){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'menu-item';
+    if(m[0]==='Главная') b.dataset.screen = 'home';
+    if(m[0]==='Новый заказ') b.dataset.screen = 'order';
+    if(m[0]==='Платежи') b.dataset.screen = 'payments';
+    if(m[0]==='Секторы') b.dataset.screen = 'sectors';
+    if(m[0]==='Сотрудники') b.dataset.screen = 'employees';
+    if(m[0]==='Настройки') b.dataset.settings = '1';
+    if(m[0]==='Поддержка') b.dataset.screen = 'support';
+    b.innerHTML = '<span class="ic">'+m[1]+'</span><span>'+m[0]+'</span>';
+    menuGrid.appendChild(b);
+  });
+
+  var menusheet = document.getElementById('menusheet');
+  var menuScrim = document.getElementById('menuScrim');
+  function setMenu(open){
+    menusheet.classList.toggle('open', open);
+    menuScrim.classList.toggle('open', open);
+    document.body.classList.toggle('menu-open', open);
+  }
+  document.getElementById('tabMenu').addEventListener('click', function(){ setMenu(!menusheet.classList.contains('open')); });
+  document.getElementById('menuClose').addEventListener('click', function(){ setMenu(false); });
+  menuScrim.addEventListener('click', function(){ setMenu(false); });
+  menuGrid.addEventListener('click', function(e){ if(e.target.closest('.menu-item')) setMenu(false); });
+
+  /* ---- Screen router ---- */
+  var tabs = document.querySelectorAll('.tab-pill .tab');
+  if(tabs[0]) tabs[0].dataset.screen = 'home';
+  if(tabs[1]) tabs[1].dataset.screen = 'order';
+  if(tabs[2]) tabs[2].dataset.screen = 'payments';
+  function showScreen(name){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('active', s.id === 'screen-'+name); });
+    document.querySelectorAll('.sidebar .nav').forEach(function(n){ n.classList.toggle('active', n.dataset.screen === name); });
+    tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.screen === name); });
+    document.querySelectorAll('#menuGrid .menu-item').forEach(function(mi){ mi.classList.toggle('active', mi.dataset.screen === name); });
+    document.body.classList.remove('editing');
+    setMenu(false);
+    var _op=document.getElementById('opPanel'); if(_op) _op.classList.remove('open');
+    var _os=document.getElementById('opScrim'); if(_os) _os.classList.remove('open');
+    var _ep=document.getElementById('empPanel'); if(_ep) _ep.classList.remove('open');
+    var _en=document.getElementById('empNew'); if(_en) _en.classList.remove('open');
+    var _es=document.getElementById('empScrim'); if(_es) _es.classList.remove('open');
+    var _sp=document.getElementById('secPanel'); if(_sp) _sp.classList.remove('open');
+    var _ss=document.getElementById('secScrim'); if(_ss) _ss.classList.remove('open');
+    document.querySelectorAll('#secList .sec-item.selected').forEach(function(x){ x.classList.remove('selected'); });
+    var _stp=document.getElementById('setPanel'); if(_stp) _stp.classList.remove('open');
+    var _sts=document.getElementById('setScrim'); if(_sts) _sts.classList.remove('open');
+    window.scrollTo(0,0);
+  }
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('[data-screen]');
+    if(el && el.dataset.screen) showScreen(el.dataset.screen);
+  });
+
+  /* ---- Sidebar collapse ---- */
+  document.getElementById('collapseToggle').addEventListener('click', function(){
+    document.querySelector('.app').classList.toggle('collapsed');
+  });
+
+  /* ---- Add-widget (edit mode) ---- */
+  document.getElementById('gearBtn').addEventListener('click', function(){ document.body.classList.toggle('editing'); });
+  document.getElementById('awClose').addEventListener('click', function(){ document.body.classList.remove('editing'); });
+  document.querySelectorAll('.widget .trash').forEach(function(t){
+    t.addEventListener('click', function(){ t.closest('.widget').classList.add('removed'); });
+  });
+  document.querySelectorAll('.aw-card').forEach(function(c){
+    c.addEventListener('click', function(){
+      var w = document.querySelector('.widget[data-widget="'+c.dataset.add+'"]');
+      if(w) w.classList.remove('removed');
+    });
+  });
+
+  /* ---- Orders segment (шт/₽) ---- */
+  var seg = document.getElementById('ordersSeg');
+  if(seg) seg.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    seg.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+  });
+
+  /* ---- Новый заказ ---- */
+  var orderScreen = document.getElementById('orderScreen');
+  // segment toggle Без товаров / С товарами
+  document.querySelectorAll('#screen-order .order-seg').forEach(function(seg){
+    seg.addEventListener('click', function(){
+      var has = orderScreen.classList.toggle('has-items');
+      document.querySelectorAll('#screen-order .order-seg b').forEach(function(b){
+        b.textContent = has ? 'С товарами' : 'Без товаров';
+      });
+      window.scrollTo(0,0);
+    });
+  });
+  // toggles
+  document.querySelectorAll('#screen-order .toggle').forEach(function(t){
+    t.addEventListener('click', function(){ t.classList.toggle('on'); });
+  });
+  // steppers (order screen + add modal)
+  document.querySelectorAll('#screen-order .stepper, #addProd .stepper').forEach(function(st){
+    var val = st.querySelector('.val');
+    st.querySelector('.minus').addEventListener('click', function(){
+      var n = parseInt(val.textContent,10)||0; if(n>0) val.textContent = n-1;
+    });
+    st.querySelector('.plus').addEventListener('click', function(){
+      var n = parseInt(val.textContent,10)||0; val.textContent = n+1;
+    });
+  });
+  // add product modal
+  var addProd = document.getElementById('addProd');
+  var addProdScrim = document.getElementById('addProdScrim');
+  function setAddProd(open){
+    addProd.classList.toggle('open', open);
+    addProdScrim.classList.toggle('open', open);
+  }
+  document.getElementById('orderAdd').addEventListener('click', function(){ setAddProd(true); });
+  document.getElementById('addProdClose').addEventListener('click', function(){ setAddProd(false); });
+  document.getElementById('addProdSubmit').addEventListener('click', function(){ setAddProd(false); });
+  addProdScrim.addEventListener('click', function(){ setAddProd(false); });
+  document.querySelectorAll('#addProd .ap-chip').forEach(function(c){
+    c.addEventListener('click', function(){
+      document.querySelectorAll('#addProd .ap-chip').forEach(function(x){ x.classList.remove('on'); });
+      c.classList.add('on');
+    });
+  });
+
+  /* ---- Заказы (payments) + карточка заказа ---- */
+  var ORDERS = [
+    {id:'10198975', time:'16:11', date:'20 дек', sum:'1 640,00', pay:'', status:'Ожидает оплаты', sector:'5423', company:'ИП Луконина Анастасия Юрьевна', desc:'Перевод на стороннюю карту', num:'116'},
+    {id:'10196074', time:'16:11', date:'20 дек', sum:'5 440,00', pay:'СБП', status:'Оплачен', sector:'6543', company:'ИП Тюляхов Алексей Анатольевич', desc:'Перевод на стороннюю карту', num:'115'},
+    {id:'10196073', time:'16:11', date:'20 дек', sum:'121 220,00', pay:'СБП', status:'Оплачен', sector:'9855', company:'ООО НЦЦ АНО «Л-Нулус»', desc:'Перевод на стороннюю карту', num:'114'},
+    {id:'10198972', time:'16:11', date:'20 дек', sum:'88 120,00', pay:'• 2256', status:'Оплачен', sector:'9855', company:'ИП Смирнова Татьяна Сергеевна', desc:'Перевод на стороннюю карту', num:'113'},
+    {id:'10198971', time:'16:11', date:'20 дек', sum:'91 210,00', pay:'• 2256', status:'Оплачен', sector:'9855', company:'ООО «Бьюти Мистик»', desc:'Перевод на стороннюю карту', num:'112'},
+    {id:'10198970', time:'16:11', date:'20 дек', sum:'91 210,00', pay:'• 2256', status:'Истёк срок', sector:'5423', company:'ИП Коряковский Максим Александрович', desc:'Перевод на стороннюю карту', num:'111'},
+    {id:'10198970', time:'16:11', date:'20 дек', sum:'91 210,00', pay:'• 2256', status:'Истёк срок', sector:'5423', company:'ИП Коряковский Максим Александрович', desc:'Перевод на стороннюю карту', num:'110'},
+    {id:'10198970', time:'16:11', date:'20 дек', sum:'91 210,00', pay:'• 2256', status:'Истёк срок', sector:'5423', company:'ИП Коряковский Максим Александрович', desc:'Перевод на стороннюю карту', num:'110'}
+  ];
+  function statusCls(s){
+    if(/Оплачен|Успе/.test(s)) return 'paid';
+    if(/Истёк/.test(s)) return 'exp';
+    if(/Создан/.test(s)) return 'new';
+    return 'wait';
+  }
+  function esc(x){ return (''+x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  var OPS = [
+    {id:'10198975', orderId:'12323248', time:'16:11', date:'20 дек', sum:'1 640,00', status:'Создана', sector:'5423', company:'ИП Луконина Анастасия Юрьевна', desc:'Перевод на стороннюю карту', num:'116'},
+    {id:'10196074', orderId:'12323248', time:'16:11', date:'20 дек', sum:'5 440,00', status:'Успех', sector:'6543', company:'ИП Тюляхов Алексей Анатольевич', desc:'Перевод на стороннюю карту', num:'115'},
+    {id:'10196073', orderId:'12323248', time:'16:11', date:'20 дек', sum:'121 220,00', status:'Успех', sector:'9855', company:'ООО НЦЦ АНО «Л-Нулус»', desc:'Перевод на стороннюю карту', num:'114'},
+    {id:'10198972', orderId:'12323248', time:'16:11', date:'20 дек', sum:'88 120,00', status:'Успех', sector:'9855', company:'ИП Смирнова Татьяна Сергеевна', desc:'Перевод на стороннюю карту', num:'113'},
+    {id:'10198971', orderId:'12323248', time:'16:11', date:'20 дек', sum:'91 210,00', status:'Успех', sector:'9855', company:'ООО «Бьюти Мистик»', desc:'Перевод на стороннюю карту', num:'112'},
+    {id:'10198970', orderId:'12323248', time:'16:11', date:'20 дек', sum:'91 210,00', status:'Истёк срок', sector:'5423', company:'ИП Коряковский Максим Александрович', desc:'Перевод на стороннюю карту', num:'111'},
+    {id:'10198970', orderId:'12323248', time:'16:11', date:'20 дек', sum:'91 210,00', status:'Истёк срок', sector:'5423', company:'ИП Коряковский Максим Александрович', desc:'Перевод на стороннюю карту', num:'110'},
+    {id:'10198970', orderId:'12323248', time:'16:11', date:'20 дек', sum:'91 210,00', status:'Истёк срок', sector:'5423', company:'ИП Коряковский Максим Александрович', desc:'Перевод на стороннюю карту', num:'110'},
+    {id:'10198971', orderId:'12323248', time:'16:11', date:'20 дек', sum:'91 210,00', status:'Успех', sector:'9855', company:'ООО «Бьюти Мистик»', desc:'Перевод на стороннюю карту', num:'112'}
+  ];
+
+  var payBody = document.getElementById('payBody');
+  var payCards = document.getElementById('payCards');
+  var payFilters = document.getElementById('payFilters');
+  var CHEV16='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  function chip(l,v){ return '<button class="pf" type="button">'+(v?'<span class="l">'+l+':</span> <b>'+esc(v)+'</b>':'<span class="l">'+l+'</span>')+' '+CHEV16+'</button>'; }
+  var FILTERS = {
+    orders: chip('Период','22 сен - 23 сен')+chip('Сектор','6238 · ИП Василенко Антонина Евгеньевна')+'<span class="pf-div"></span>'+chip('Cтатус')+chip('Регулярный платёж')+chip('Способ оплаты'),
+    ops: chip('Период','22 сен - 23 сен')+chip('Сектор','6238 · ИП Василенко Антонина Евгеньевна')+'<span class="pf-div"></span>'+chip('Cтатус')+chip('Тип операции')+chip('Фискальный статус')+chip('Статус возврата платежа')+'<span class="pf-div"></span>'+chip('b2bUserPay')+chip('Recurring post state')+chip('Штраф за возврат средств')+chip('Мобильный кошелёк')
+  };
+  var VIEWS = {
+    orders: {arr:ORDERS, label:'ID заказа', open:openOrder},
+    ops: {arr:OPS, label:'ID операции', open:openOp}
+  };
+  function renderTable(view){
+    var cfg = VIEWS[view];
+    document.getElementById('payColId').textContent = cfg.label;
+    payFilters.innerHTML = FILTERS[view];
+    payBody.innerHTML=''; payCards.innerHTML='';
+    cfg.arr.forEach(function(o){
+      var cls = statusCls(o.status);
+      var idCell = '<div class="ptc"><span class="v lnk">'+esc(o.id)+'</span>'+(o.orderId?'<span class="idsub">Заказ '+esc(o.orderId)+'</span>':'')+'</div>';
+      var row = document.createElement('div');
+      row.className = 'ptrow';
+      row.innerHTML =
+        idCell +
+        '<div class="ptc"><span class="v">'+esc(o.time)+'</span><span class="s">'+esc(o.date)+'</span></div>'+
+        '<div class="ptc rt"><span class="v num">'+esc(o.sum)+'</span>'+(o.pay?'<span class="payrow">'+esc(o.pay)+'</span>':'')+'</div>'+
+        '<div class="ptc status"><span class="st-dot '+cls+'"></span><span class="v">'+esc(o.status)+'</span></div>'+
+        '<div class="ptc"><span class="v">'+esc(o.sector)+'</span><span class="s">'+esc(o.company)+'</span></div>'+
+        '<div class="ptc"><span class="v">'+esc(o.desc)+'</span></div>'+
+        '<div class="ptc"><span class="v">'+esc(o.num)+'</span></div>';
+      row.addEventListener('click', function(){ cfg.open(o); });
+      payBody.appendChild(row);
+
+      var card = document.createElement('div');
+      card.className = 'pcard';
+      card.innerHTML =
+        '<div class="pcard-top"><span class="pcard-id">'+esc(o.id)+'</span>'+
+          '<span class="pcard-status"><span class="st-dot '+cls+'"></span>'+esc(o.status)+'</span></div>'+
+        '<div class="pcard-sum">'+esc(o.sum)+' ₽</div>'+
+        '<div class="pcard-sub">'+esc(o.sector)+' · '+esc(o.company)+'</div>'+
+        '<div class="pcard-sub">'+esc(o.time)+' · '+esc(o.date)+(o.pay?' · '+esc(o.pay):'')+'</div>';
+      card.addEventListener('click', function(){ cfg.open(o); });
+      payCards.appendChild(card);
+    });
+  }
+
+  function openOrder(o){
+    var cls = statusCls(o.status);
+    document.getElementById('odId').textContent = o.id;
+    document.getElementById('odDate').textContent = 'Создан ' + o.date + ' ' + o.time;
+    document.getElementById('odAmt').textContent = o.sum + ' ₽';
+    document.getElementById('odStatusText').textContent = o.status;
+    document.getElementById('odPanel').className = 'od-panel st-' + cls;
+    document.querySelector('#odStatus .dot').className = 'dot ' + cls;
+    document.getElementById('odDesc').textContent = o.desc;
+    document.getElementById('odNum').textContent = o.num;
+    document.getElementById('odSector').textContent = o.sector + ' • ' + o.company;
+    document.getElementById('odOpTime').textContent = o.date + ' ' + o.time;
+    showScreen('order-detail');
+  }
+
+  var opPanel = document.getElementById('opPanel');
+  var opScrim = document.getElementById('opScrim');
+  function openOp(op){
+    var cls = statusCls(op.status);
+    document.getElementById('opId').textContent = op.id;
+    document.getElementById('opDate').textContent = op.date + ' 2026, ' + op.time;
+    document.getElementById('opAmt').textContent = 'Оплата ' + op.sum + ' ₽';
+    document.getElementById('opStatus').textContent = (op.status==='Успех'?'Успешно':op.status);
+    document.getElementById('opStatusSub').textContent = (cls==='paid'?'Операция одобрена эмитентом':(cls==='exp'?'Истёк срок действия ссылки':'Операция создана'));
+    document.getElementById('opDot').className = 'd ' + cls;
+    document.getElementById('opSector').textContent = op.sector + ' · ' + op.company;
+    document.getElementById('opTermId').textContent = op.id;
+    document.getElementById('opOrderId').textContent = op.orderId || '—';
+    opScrim.classList.add('open'); opPanel.classList.add('open');
+  }
+  function closeOp(){ opScrim.classList.remove('open'); opPanel.classList.remove('open'); }
+  document.getElementById('opClose').addEventListener('click', closeOp);
+  opScrim.addEventListener('click', closeOp);
+
+  // Заказы / Операции tabs
+  document.querySelectorAll('#screen-payments .pay-tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('#screen-payments .pay-tab').forEach(function(x){ x.classList.toggle('active', x===t); });
+      renderTable(t.dataset.ptab);
+      window.scrollTo(0,0);
+    });
+  });
+  renderTable('orders');
+
+  /* ---- Сотрудники ---- */
+  var EMP = [
+    {name:'dmitry.market.manager', mail:'@gmail.com', sec:'Сектор 7923', sector:'7923 · ИП Смирнов Денис Сергеевич', role:'edit', lvl:'Полный'},
+    {name:'alexei.smirnov', mail:'@gmail.com', sec:'Сектор 7923', sector:'7923 · ИП Смирнов Денис Сергеевич', role:'edit', lvl:'Полный'},
+    {name:'elena.avdeeva', mail:'@gmail.com', sec:'Сектор 7923', sector:'7923 · ИП Смирнов Денис Сергеевич', role:'view', lvl:'Частичный'}
+  ];
+  var PEN='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13 3l4 4-9 9H4v-4z"/></svg>';
+  var EYE='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/></svg>';
+  function roleIcon(r){ return r==='edit'?PEN:EYE; }
+  var empList = document.getElementById('empList');
+  EMP.forEach(function(e){
+    var c = document.createElement('div'); c.className='emp-card';
+    c.innerHTML = '<div class="nm">'+esc(e.name)+'</div>'+
+      '<div class="row"><span class="mail">'+esc(e.mail)+'</span><span class="sec">'+esc(e.sec)+'</span>'+
+      '<span class="emp-role '+e.role+'">'+roleIcon(e.role)+'</span></div>';
+    c.addEventListener('click', function(){ openEmp(e); });
+    empList.appendChild(c);
+  });
+  var empPanel=document.getElementById('empPanel');
+  var empNew=document.getElementById('empNew');
+  var empScrim=document.getElementById('empScrim');
+  function openEmp(e){
+    document.getElementById('epdName').textContent=e.name;
+    document.getElementById('epdMail').textContent=e.mail;
+    document.getElementById('epdSector').textContent=e.sector;
+    document.getElementById('epdLvl').textContent=e.lvl;
+    var role=document.getElementById('epdRole'); role.className='emp-role '+e.role; role.innerHTML=roleIcon(e.role);
+    empNew.classList.remove('open');
+    empScrim.classList.add('open'); empPanel.classList.add('open');
+  }
+  function openEmpNew(){ empPanel.classList.remove('open'); empScrim.classList.add('open'); empNew.classList.add('open'); }
+  function closeEmp(){ empScrim.classList.remove('open'); empPanel.classList.remove('open'); empNew.classList.remove('open'); }
+  document.getElementById('empCreate').addEventListener('click', openEmpNew);
+  document.getElementById('epdClose').addEventListener('click', closeEmp);
+  document.getElementById('empNewClose').addEventListener('click', closeEmp);
+  empScrim.addEventListener('click', closeEmp);
+  document.querySelectorAll('#empNew .epn-lvl').forEach(function(b){
+    b.addEventListener('click', function(){ document.querySelectorAll('#empNew .epn-lvl').forEach(function(x){ x.classList.toggle('on', x===b); }); });
+  });
+
+  /* ---- Секторы: список + детальная карточка ---- */
+  var SECTORS = [
+    {code:'7925', name:'ИП Иванова Мария Петровна'},
+    {code:'7923', name:'ИП Смирнов Денис Сергеевич'},
+    {code:'7923', name:'ООО «Национальный центр консалтинга, аудита и правового сопровождения бизнеса»'},
+    {code:'7923', name:'ООО НЦЦ АНО «Л-Нулус»'},
+    {code:'7923', name:'ИП Тюляхов Алгыс Анатольевич'},
+    {code:'7923', name:'ООО «АБВГД»'},
+    {code:'7923', name:'ИП Смирнов Денис Сергеевич'},
+    {code:'7923', name:'ИП Смирнов Денис Сергеевич'}
+  ];
+  var secRoot = document.getElementById('secRoot');
+  var secListEl = document.getElementById('secList');
+  var secEmpty = document.getElementById('secEmpty');
+  var secSearch = document.getElementById('secSearch');
+  function renderSecList(q){
+    q = (q||'').trim().toLowerCase();
+    secListEl.innerHTML = '';
+    var matches = SECTORS.filter(function(s){
+      return !q || s.code.toLowerCase().indexOf(q) !== -1 || s.name.toLowerCase().indexOf(q) !== -1;
+    });
+    matches.forEach(function(s){
+      var it = document.createElement('div'); it.className='sec-item';
+      it.innerHTML = '<span class="code">'+esc(s.code)+'</span><span class="nm">'+esc(s.name)+'</span>';
+      it.addEventListener('click', function(){ openSector(s, it); });
+      secListEl.appendChild(it);
+    });
+    if(secEmpty) secEmpty.hidden = matches.length !== 0;
+  }
+  if(secListEl) renderSecList('');
+  if(secSearch) secSearch.addEventListener('input', function(){ renderSecList(secSearch.value); });
+
+  var secPanel = document.getElementById('secPanel');
+  var secScrim = document.getElementById('secScrim');
+  function openSector(s, el){
+    document.getElementById('secCode').textContent = 'Сектор ' + s.code;
+    document.getElementById('secName').textContent = s.name;
+    document.querySelectorAll('#secList .sec-item').forEach(function(x){ x.classList.toggle('selected', x===el); });
+    secScrim.classList.add('open'); secPanel.classList.add('open');
+  }
+  function closeSector(){
+    secScrim.classList.remove('open'); secPanel.classList.remove('open');
+    document.querySelectorAll('#secList .sec-item.selected').forEach(function(x){ x.classList.remove('selected'); });
+  }
+  document.getElementById('secClose').addEventListener('click', closeSector);
+  secScrim.addEventListener('click', closeSector);
+
+  /* ---- Секторы: аккордеон «Квитанция» ---- */
+  var secAcc = document.getElementById('secAcc');
+  var secAccBody = document.getElementById('secAccBody');
+  if(secAcc) secAcc.addEventListener('click', function(){
+    var open = secAcc.classList.toggle('open');
+    secAccBody.style.maxHeight = open ? (secAccBody.querySelector('.inner').scrollHeight + 16) + 'px' : '0px';
+  });
+
+  /* ---- Настройки (панель профиля) ---- */
+  var setPanel = document.getElementById('setPanel');
+  var setScrim = document.getElementById('setScrim');
+  function openSettings(){ setScrim.classList.add('open'); setPanel.classList.add('open'); }
+  function closeSettings(){ setScrim.classList.remove('open'); setPanel.classList.remove('open'); }
+  document.getElementById('setClose').addEventListener('click', closeSettings);
+  setScrim.addEventListener('click', closeSettings);
+  document.addEventListener('click', function(e){
+    if(e.target.closest('[data-settings]')){ setMenu(false); openSettings(); }
+  });
+  document.getElementById('setLogout').addEventListener('click', closeSettings);
+
+  // разделы для «Отображение разделов»
+  var setSections = document.getElementById('setSections');
+  ['Главная','Новый заказ','Платежи','Секторы','QR-static','Сессии Плайт','Выплаты','Пользователи','Реестры','Сотрудники'].forEach(function(name,i){
+    var r=document.createElement('div'); r.className='set-srow';
+    r.innerHTML='<span>'+name+'</span><button class="set-toggle'+(i<7?' on':'')+'" type="button"></button>';
+    setSections.appendChild(r);
+  });
+
+  // аккордеоны в настройках
+  document.querySelectorAll('#setPanel .set-acc').forEach(function(acc){
+    var head = acc.querySelector('.set-item');
+    var body = acc.querySelector('.set-body');
+    head.style.cursor='pointer';
+    head.addEventListener('click', function(){
+      var open = acc.classList.toggle('open');
+      body.style.maxHeight = open ? (body.querySelector('.inner').scrollHeight + 8) + 'px' : '0px';
+    });
+    var cancel = acc.querySelector('[data-setacc-close]');
+    if(cancel) cancel.addEventListener('click', function(ev){
+      ev.stopPropagation(); acc.classList.remove('open'); body.style.maxHeight='0px';
+    });
+  });
+  // toggles внутри панели
+  document.querySelectorAll('#setPanel .set-toggle').forEach(function(t){
+    t.addEventListener('click', function(ev){ ev.stopPropagation(); t.classList.toggle('on'); });
+  });
+  // показать/скрыть пароль
+  document.querySelectorAll('#setPanel [data-eye]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var inp = b.parentElement.querySelector('input');
+      inp.type = inp.type==='password' ? 'text' : 'password';
+    });
+  });
+  // фокус-рамка для полей пароля
+  document.querySelectorAll('#setPanel .set-pf input').forEach(function(inp){
+    inp.addEventListener('focus', function(){ inp.closest('.set-pf').classList.add('focus'); });
+    inp.addEventListener('blur', function(){ inp.closest('.set-pf').classList.remove('focus'); });
+  });
+
+  showScreen('home');
+</script>
+
+</body>
+</html>
