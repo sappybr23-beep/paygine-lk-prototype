@@ -516,7 +516,7 @@
   .od-copy{color:var(--muted);width:24px;height:24px;flex-shrink:0}
   .od-date{font-size:16px;font-weight:500;color:var(--muted);white-space:nowrap}
 
-  .od-panel{border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:40px;box-shadow:0 6px 17px rgba(0,0,0,.08);background:#fff}
+  .od-panel{border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:40px;box-shadow:0 6px 17px rgba(0,0,0,.08);background:#fff}
   .od-panel.st-paid{background:linear-gradient(105deg,#fff 52%,#eafaef)}
   .od-panel.st-wait{background:linear-gradient(105deg,#fff 52%,#fdf5e7)}
   .od-panel.st-exp{background:linear-gradient(105deg,#fff 52%,#fcedec)}
@@ -625,6 +625,22 @@
   .op-r .k{width:120px;flex-shrink:0;color:var(--muted)}
   .op-r .v{flex:1;min-width:0;color:var(--ink);overflow-wrap:anywhere}
   @media (max-width:900px){ .oppanel{width:100%;padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px))} }
+
+  /* ===== Detail pages (order / operation): centered column, 2-col, sticky side ===== */
+  .dt{max-width:1180px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:24px}
+  .dt-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}
+  .dt-main{display:flex;flex-direction:column;gap:40px;min-width:0}
+  .dt-main .od-sec,.dt-main .op-sec{padding:0}
+  .dt-side{position:sticky;top:24px;display:flex;flex-direction:column;gap:20px;min-width:0}
+  .dt-side .od-sec,.dt-side .op-sec{padding:0}
+  .od-status .dot.new{background:#8E92AA}
+  .op-btn.inline{align-self:flex-start;padding:0 28px}
+  .dt-side .op-sec h3 .lk{width:18px;height:18px;color:#9AA1AE;vertical-align:-3px;display:inline-block}
+  @media (max-width:900px){
+    .dt{padding:16px 24px 120px;gap:20px}
+    .dt-grid{grid-template-columns:1fr;gap:28px}
+    .dt-side{position:static}
+  }
 
   /* ===== Сотрудники (employees) ===== */
   #screen-employees .emp{padding:24px}
@@ -1170,75 +1186,135 @@
     </section>
 
     <section class="screen" id="screen-order-detail">
-      <div class="od">
-        <div class="od-col">
-          <div class="od-head">
-            <button class="od-back" type="button" data-screen="payments">
-              <svg class="bk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-              <span class="od-id">ID <span id="odId">1245135151</span></span>
-              <span class="od-copy"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M15 9V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h5"/></svg></span>
-            </button>
-            <span class="od-date" id="odDate">Создан 27 ноября 12:52</span>
-          </div>
+      <div class="dt">
+        <div class="od-head">
+          <button class="od-back" type="button" data-screen="payments">
+            <svg class="bk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+            <span class="od-id">ID <span id="odId">1245135151</span></span>
+            <span class="od-copy"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M15 9V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h5"/></svg></span>
+          </button>
+        </div>
 
-          <div class="od-panel st-wait" id="odPanel">
-            <div class="od-amt-row">
-              <div class="od-amt" id="odAmt">3 200 ₽</div>
-              <div class="od-status" id="odStatus"><span class="dot wait"></span><span id="odStatusText">Ожидает оплаты</span></div>
-            </div>
-            <div class="od-linkwrap">
-              <div class="od-linktitles">
-                <div><span class="t">Ссылка на оплату</span><span class="d">Скопировать ссылку</span></div>
-                <div><span class="t">&nbsp;</span><span class="d">Отправить ссылку на эл. почту или по смс</span></div>
+        <div class="dt-grid">
+          <div class="dt-main">
+            <div class="od-panel st-wait" id="odPanel">
+              <div class="od-amt-row">
+                <div class="od-amt" id="odAmt">3 200 ₽</div>
+                <div class="od-status" id="odStatus"><span class="dot wait"></span><span id="odStatusText">Ожидает оплаты</span></div>
               </div>
-              <div class="od-fields">
-                <div class="od-field">
-                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></span>
-                  <span class="ft">https://paygine/myshaurma/payment_1.ru</span>
-                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 7l9 7 9-7"/></svg></span>
+              <button class="op-btn inline" type="button" id="odAction">Оформить возврат</button>
+            </div>
+
+            <div class="od-sec">
+              <h3>Операции</h3>
+              <div class="od-oprow"><span class="opdot"></span><span class="opname">Заказ создан</span><span class="optime" id="odOpTime">27 ноября 12:52</span></div>
+            </div>
+
+            <div class="od-sec">
+              <h3>Позиции <span class="od-poscount">2</span></h3>
+              <div class="od-postable">
+                <div class="od-pos-h">
+                  <div>Товар или услуга</div><div class="r">Цена, ₽</div><div></div><div class="r">Сумма, ₽</div>
                 </div>
-                <div class="od-field">
-                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 7l9 7 9-7"/></svg></span>
-                  <span class="ft ph">Эл. почта получателя</span>
-                  <span class="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
+                <div class="od-pos-r">
+                  <div class="nm"><b>Майка 42 S белый</b><span>НДС не облагается</span></div>
+                  <div class="pr">1 200,00</div>
+                  <div class="qt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>1</div>
+                  <div class="pr">1 200,00</div>
+                </div>
+                <div class="od-pos-r">
+                  <div class="nm"><b>Шорты 44 M красный</b><span>НДС 20%</span></div>
+                  <div class="pr">2 000,00</div>
+                  <div class="qt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>1</div>
+                  <div class="pr">2 000,00</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="od-sec">
-            <h3>Подробности</h3>
-            <div class="od-drow"><span class="k">Описание</span><span class="v" id="odDesc">Майка 42 S белый 1 шт. Шорты 44 M красный 1 шт</span></div>
-            <div class="od-drow"><span class="k">№ Заказа</span><span class="v" id="odNum">856765</span></div>
-            <div class="od-drow"><span class="k">Сектор</span><span class="v" id="odSector">6238 • ИП Василенко Антонина Евгеньевна</span></div>
-            <span class="od-more">Подробнее <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
-          </div>
+          <aside class="dt-side">
+            <div class="od-sec">
+              <h3>Подробности</h3>
+              <div class="od-drow"><span class="k">Создан</span><span class="v" id="odDate">27 ноября 12:52</span></div>
+              <div class="od-drow"><span class="k">Описание</span><span class="v" id="odDesc">Майка 42 S белый 1 шт. Шорты 44 M красный 1 шт</span></div>
+              <div class="od-drow"><span class="k">№ Заказа</span><span class="v" id="odNum">856765</span></div>
+              <div class="od-drow"><span class="k">Сектор</span><span class="v" id="odSector">6238 • ИП Василенко Антонина Евгеньевна</span></div>
+              <span class="od-more">Подробнее <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
 
-          <div class="od-sec">
-            <h3>Операции</h3>
-            <div class="od-oprow"><span class="opdot"></span><span class="opname">Заказ создан</span><span class="optime" id="odOpTime">27 ноября 12:52</span></div>
-          </div>
+    <section class="screen" id="screen-op-detail">
+      <div class="dt">
+        <div class="od-head">
+          <button class="od-back" type="button" data-screen="payments">
+            <svg class="bk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+            <span class="od-id">Операция <span id="opId">10198975</span></span>
+            <span class="od-copy"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M15 9V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h5"/></svg></span>
+          </button>
+        </div>
 
-          <div class="od-sec">
-            <h3>Позиции <span class="od-poscount">2</span></h3>
-            <div class="od-postable">
-              <div class="od-pos-h">
-                <div>Товар или услуга</div><div class="r">Цена, ₽</div><div></div><div class="r">Сумма, ₽</div>
+        <div class="dt-grid">
+          <div class="dt-main">
+            <div class="od-panel st-paid" id="opPanelCard">
+              <div class="od-amt-row">
+                <div class="od-amt" id="opAmt">3 200 ₽</div>
+                <div class="od-status" id="opStatusWrap"><span class="dot paid" id="opDot"></span><span id="opStatus">Успешно</span></div>
               </div>
-              <div class="od-pos-r">
-                <div class="nm"><b>Майка 42 S белый</b><span>НДС не облагается</span></div>
-                <div class="pr">1 200,00</div>
-                <div class="qt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>1</div>
-                <div class="pr">1 200,00</div>
-              </div>
-              <div class="od-pos-r">
-                <div class="nm"><b>Шорты 44 M красный</b><span>НДС 20%</span></div>
-                <div class="pr">2 000,00</div>
-                <div class="qt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>1</div>
-                <div class="pr">2 000,00</div>
-              </div>
+              <button class="op-btn inline" type="button">Отправить документы</button>
+            </div>
+
+            <div class="op-sec big">
+              <h3 class="h24">Основные</h3>
+              <div class="op-r"><span class="k">ID операции</span><span class="v" id="opOpId">856765</span></div>
+              <div class="op-r"><span class="k">Создана</span><span class="v" id="opDate">27 ноября 12:52</span></div>
+              <div class="op-r"><span class="k">Тип операции</span><span class="v">Оплата</span></div>
+              <div class="op-r"><span class="k">Тип платежа</span><span class="v">—</span></div>
+              <div class="op-r"><span class="k">Сумма</span><span class="v" id="opSum">3 200 ₽</span></div>
+              <div class="op-r"><span class="k">Комиссия</span><span class="v">0 ₽</span></div>
+              <div class="op-r"><span class="k">С комиссией</span><span class="v" id="opSumFee">3 200 ₽</span></div>
+              <div class="op-r"><span class="k">Сектор</span><span class="v" id="opSector">5654 · ИП Иванов Иван Иванович</span></div>
+              <div class="op-r"><span class="k">Сообщение</span><span class="v">Операция одобрена эмитентом</span></div>
+              <div class="op-r"><span class="k">Платёжная система</span><span class="v">—</span></div>
+              <div class="op-r"><span class="k">RRN</span><span class="v">052600016540</span></div>
+              <div class="op-r"><span class="k">Код авторизации</span><span class="v">242805</span></div>
+              <div class="op-r"><span class="k">Refer</span><span class="v">https://review-950-569.review.wallet.zaymer.ru/replenishment</span></div>
+            </div>
+
+            <div class="op-sec big">
+              <h3 class="h24">Плательщик</h3>
+              <div class="op-r"><span class="k">Инициатор</span><span class="v">username635384323</span></div>
+              <div class="op-r"><span class="k">Имя держателя</span><span class="v">UNKNOWN NAME</span></div>
+              <div class="op-r"><span class="k">Номер карты плательщика</span><span class="v">5406 16•• •••• 0041</span></div>
+              <div class="op-r"><span class="k">IP адрес плательщика</span><span class="v">194.32.96.1</span></div>
+              <div class="op-r"><span class="k">Тип операции</span><span class="v">P2PTRANSFER</span></div>
+              <div class="op-r"><span class="k">Статус операции</span><span class="v">Approved</span></div>
+              <div class="op-r"><span class="k">Страна карты отправителя</span><span class="v">RU</span></div>
+              <div class="op-r"><span class="k">b2pUserPay</span><span class="v">B2PUSERP2PIN</span></div>
+            </div>
+
+            <div class="op-sec big">
+              <h3 class="h24">Получатель</h3>
+              <div class="op-r"><span class="k">Номер карты получателя</span><span class="v">220441•• •••• 8585</span></div>
+              <div class="op-r"><span class="k">Страна карты получателя</span><span class="v">RU</span></div>
+              <div class="op-r"><span class="k">Токен карты</span><span class="v">ae9ee5a3-f21c-4be4-8ee6-97f91bdd848a</span></div>
             </div>
           </div>
+
+          <aside class="dt-side">
+            <div class="op-sec">
+              <h3>Заказ <span class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></h3>
+              <div class="op-r"><span class="k">ID заказа</span><span class="v" id="opOrderId">12980665</span></div>
+              <div class="op-r"><span class="k">Создан</span><span class="v">27 ноября 12:52</span></div>
+              <div class="op-r"><span class="k">Статус</span><span class="v"><span class="od-status" style="padding:0;font-size:16px;gap:8px"><span class="dot paid"></span>Оплачен</span></span></div>
+              <div class="op-r"><span class="k">Номер заказа</span><span class="v">REPLENISHMENT_3db2349b-c4c3-435e-8218-abb88e73c7b7</span></div>
+              <div class="op-r"><span class="k">Описание заказа</span><span class="v">Пополнение баланса карты</span></div>
+              <div class="op-r"><span class="k">Сумма</span><span class="v">3 200 ₽</span></div>
+              <div class="op-r"><span class="k">Актуальная сумма</span><span class="v">3 200 ₽</span></div>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
@@ -1511,71 +1587,6 @@
   <button class="order-submit" id="addProdSubmit" type="button">Добавить товар</button>
 </div>
 
-<!-- Операция (боковая панель) -->
-<div class="oppanel-scrim" id="opScrim"></div>
-<aside class="oppanel" id="opPanel" aria-label="Операция">
-  <div class="op-inner">
-    <div class="op-top">
-      <div class="op-head">
-        <div class="op-htitles">
-          <span class="op-title">Операция <span id="opId">10198975</span> <span class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></span>
-          <span class="op-date" id="opDate">27 ноября 2026, 12:53</span>
-        </div>
-        <button class="op-close" id="opClose" type="button" aria-label="Закрыть"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      </div>
-      <div class="op-amt" id="opAmt">Оплата 5 440 ₽</div>
-      <div class="op-status">
-        <div class="st"><span class="d" id="opDot"></span><span id="opStatus">Успешно</span></div>
-        <span class="sub" id="opStatusSub">Операция одобрена эмитентом</span>
-      </div>
-      <button class="op-btn" type="button">Отправить документы</button>
-    </div>
-
-    <div class="op-sec">
-      <h3>Основные</h3>
-      <div class="op-r"><span class="k">Комиссия</span><span class="v">0 ₽</span></div>
-      <div class="op-r"><span class="k">Сектор</span><span class="v" id="opSector">5654 · ИП Иванов Иван Иванович</span></div>
-      <div class="op-r"><span class="k">Terminal ID</span><span class="v" id="opTermId">10198975</span></div>
-      <div class="op-r"><span class="k">Оригинальная операция</span><span class="v">5654 · ИП Иванов Иван Иванович</span></div>
-    </div>
-
-    <div class="op-sec big">
-      <h3>Заказ</h3>
-      <div class="op-r"><span class="k">ID заказа</span><span class="v" id="opOrderId">12980665</span></div>
-      <div class="op-r"><span class="k">Номер заказа</span><span class="v">REPLENISHMENT_3db2349b-c4c3-435e-8218-abb88e73c7b7</span></div>
-      <div class="op-r"><span class="k">Описание заказа</span><span class="v">Пополнение баланса карты</span></div>
-      <div class="op-r"><span class="k">Фискальный статус</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">Номер договора</span><span class="v">—</span></div>
-    </div>
-
-    <div class="op-sec big">
-      <h3 class="h24">Плательщик</h3>
-      <div class="op-r"><span class="k">Инициатор</span><span class="v">username635384323</span></div>
-      <div class="op-r"><span class="k">Имя держателя</span><span class="v">UNKNOWN NAME</span></div>
-      <div class="op-r"><span class="k">Номер карты плательщика</span><span class="v">5406 16•• •••• 0041</span></div>
-      <div class="op-r"><span class="k">Наименование банка эмитента плательщика</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">IP адрес плательщика</span><span class="v">194.32.96.1</span></div>
-      <div class="op-r"><span class="k">Terminal ID</span><span class="v">POS_1</span></div>
-      <div class="op-r"><span class="k">Тип операции</span><span class="v">P2PTRANSFER</span></div>
-      <div class="op-r"><span class="k">Статус операции</span><span class="v">Approved</span></div>
-      <div class="op-r"><span class="k">Страна карты отправителя</span><span class="v">RU</span></div>
-      <div class="op-r"><span class="k">Email</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">Телефон</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">Имя</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">Фамилия</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">Отчество</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">b2pUserPay</span><span class="v">B2PUSERP2PIN</span></div>
-    </div>
-
-    <div class="op-sec big">
-      <h3 class="h24">Получатель</h3>
-      <div class="op-r"><span class="k">Номер карты получателя</span><span class="v">220441•• •••• 8585</span></div>
-      <div class="op-r"><span class="k">Наименование банка эмитента плательщика</span><span class="v">—</span></div>
-      <div class="op-r"><span class="k">Страна карты получателя</span><span class="v">RU</span></div>
-      <div class="op-r"><span class="k">Токен карты</span><span class="v">ae9ee5a3-f21c-4be4-8ee6-97f91bdd848a</span></div>
-    </div>
-  </div>
-</aside>
 
 <aside class="addwidget" id="addwidget" aria-label="Добавить виджет">
   <div class="aw-head">
@@ -1943,7 +1954,7 @@
   function openOrder(o){
     var cls = statusCls(o.status);
     document.getElementById('odId').textContent = o.id;
-    document.getElementById('odDate').textContent = 'Создан ' + o.date + ' ' + o.time;
+    document.getElementById('odDate').textContent = o.date + ' ' + o.time;
     document.getElementById('odAmt').textContent = o.sum + ' ₽';
     document.getElementById('odStatusText').textContent = o.status;
     document.getElementById('odPanel').className = 'od-panel st-' + cls;
@@ -1955,24 +1966,20 @@
     showScreen('order-detail');
   }
 
-  var opPanel = document.getElementById('opPanel');
-  var opScrim = document.getElementById('opScrim');
   function openOp(op){
     var cls = statusCls(op.status);
     document.getElementById('opId').textContent = op.id;
-    document.getElementById('opDate').textContent = op.date + ' 2026, ' + op.time;
-    document.getElementById('opAmt').textContent = 'Оплата ' + op.sum + ' ₽';
+    document.getElementById('opDate').textContent = op.date + ' ' + op.time;
+    document.getElementById('opAmt').textContent = op.sum + ' ₽';
     document.getElementById('opStatus').textContent = (op.status==='Успех'?'Успешно':op.status);
-    document.getElementById('opStatusSub').textContent = (cls==='paid'?'Операция одобрена эмитентом':(cls==='exp'?'Истёк срок действия ссылки':'Операция создана'));
-    document.getElementById('opDot').className = 'd ' + cls;
+    document.getElementById('opDot').className = 'dot ' + cls;
     document.getElementById('opSector').textContent = op.sector + ' · ' + op.company;
-    document.getElementById('opTermId').textContent = op.id;
+    document.getElementById('opOpId').textContent = op.id;
+    document.getElementById('opSum').textContent = op.sum + ' ₽';
+    document.getElementById('opSumFee').textContent = op.sum + ' ₽';
     document.getElementById('opOrderId').textContent = op.orderId || '—';
-    opScrim.classList.add('open'); opPanel.classList.add('open');
+    showScreen('op-detail');
   }
-  function closeOp(){ opScrim.classList.remove('open'); opPanel.classList.remove('open'); }
-  document.getElementById('opClose').addEventListener('click', closeOp);
-  opScrim.addEventListener('click', closeOp);
 
   // Заказы / Операции tabs
   document.querySelectorAll('#screen-payments .pay-tab').forEach(function(t){
