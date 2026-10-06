@@ -368,10 +368,13 @@
   .order.has-items .order-full{display:block}
   .order-full .order-topwrap{max-width:none;margin-bottom:24px}
   .order-cols{display:grid;grid-template-columns:384px minmax(0,1fr)}
-  .order-left{border-right:1px solid #E8ECEE;padding:0 24px 24px 0;display:flex;flex-direction:column;gap:16px}
-  .ol-h{font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
-  .order-left .heading{padding-bottom:12px}
-  .ol-reg{display:flex;flex-direction:column;gap:28px;padding-top:24px}
+  .order-left{border-right:1px solid #E8ECEE;padding:12px 24px 24px 0;display:flex;flex-direction:column;gap:16px}
+  .ol-h{font-size:16px;font-weight:600;line-height:20px;color:var(--ink)}
+  .order-left .heading{padding-bottom:4px}
+  .ol-div{height:1px;background:#2828280F;margin:8px 0}
+  .ol-reg{display:flex;flex-direction:column;gap:28px}
+  .ol-reg-body{display:none;flex-direction:column;gap:28px;padding-top:28px}
+  .ol-reg:has(> .ol-row .toggle.on) .ol-reg-body{display:flex}
   .ol-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .ol-selects{display:flex;flex-direction:column;gap:16px}
   .ol-retry{display:flex;flex-direction:column;gap:20px}
@@ -388,14 +391,15 @@
   .ot-head .r{justify-content:flex-end}
   .ot-head .c{justify-content:center}
   .ot-cell{padding:10px 4px}
-  .ot-chip{background:var(--field);border-radius:4px;min-height:40px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:500;line-height:20px;color:var(--ink)}
+  .ot-chip{background:var(--field);border-radius:12px;min-height:48px;padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:500;line-height:20px;color:var(--ink)}
   .ot-chip .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .ot-chip input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:inherit;font-size:16px;font-weight:500;line-height:20px;color:var(--ink);letter-spacing:-.01em;padding:0}
   .ot-chip.r input{text-align:right}
   .ot-chip:has(.chev){cursor:pointer}
   .ot-chip.r{justify-content:flex-end}
   .ot-chip .chev{color:var(--muted);flex-shrink:0;margin-left:auto;width:16px;height:16px}
-  .ot-qty{display:flex;align-items:center;justify-content:center;padding:20px 16px}
+  .ot-qty{display:flex;align-items:center;justify-content:center;padding:10px 4px}
+  .ot-qty .stepper{background:var(--field);border-radius:12px;padding:12px;gap:8px;min-height:48px;justify-content:center}
   .ot-sum{padding:20px 16px;text-align:right;font-family:"Inter",system-ui,sans-serif;font-weight:600;font-size:16px;line-height:20px;color:var(--ink)}
   .ot-del{display:flex;align-items:center;justify-content:center;padding:0 16px}
   .ot-del button{border:0;background:none;cursor:pointer;color:var(--muted);display:grid;place-items:center;padding:0;width:20px;height:20px}
@@ -1053,16 +1057,19 @@
             <div class="order-cols">
               <!-- left column -->
               <div class="order-left">
-                <div class="ol-h heading">Заказ</div>
+                <div class="ol-h heading">Основная информация</div>
                 <label class="ofield"><input type="text" placeholder="№ Заказа"></label>
                 <label class="ofield"><input type="text" placeholder="Описание"></label>
                 <label class="ofield"><input type="text" placeholder="Email для квитанции"></label>
 
+                <div class="ol-div"></div>
+
                 <div class="ol-reg">
                   <div class="ol-row">
                     <span class="ol-h">Регулярные платежи</span>
-                    <button class="toggle on" type="button" aria-label="Регулярные платежи"></button>
+                    <button class="toggle" type="button" role="switch" aria-checked="false" aria-label="Регулярные платежи"></button>
                   </div>
+                  <div class="ol-reg-body">
                   <div class="ol-selects">
                     <div class="ofield select">Периодичность списаний <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
                     <div class="ofield select">Период <span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
@@ -1083,17 +1090,16 @@
                     <span class="ol-h">Продолжать после ошибок</span>
                     <button class="toggle on" type="button" aria-label="Продолжать после ошибок"></button>
                   </div>
+                  </div>
                 </div>
               </div>
 
               <!-- right column -->
               <div class="order-right">
-                <div class="or-title">Позиции</div>
-
                 <!-- desktop table -->
                 <div class="or-table">
                   <div class="ot-head">
-                    <div>Наименование</div><div>НДС</div><div class="r">Цена, ₽</div><div class="c">Кол-во</div><div class="r">Сумма, ₽</div><div></div>
+                    <div>Позиции</div><div>НДС</div><div class="r">Цена, ₽</div><div class="c">Кол-во</div><div class="r">Сумма, ₽</div><div></div>
                   </div>
                   <div class="ot-row">
                     <div class="ot-cell"><div class="ot-chip"><input class="nm" type="text" value="Мотокоса бензиновая Oasis GT TB-2500N 3.3 л.с."></div></div>
@@ -1145,7 +1151,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                     Добавить позицию
                   </button>
-                  <div class="or-total"><span class="cnt">3 позиции</span><span class="dv"></span><span class="sum">19 250 ₽</span></div>
+                  <div class="or-total"><span class="cnt">1 позиция</span><span class="dv"></span><span class="sum">7 090 ₽</span></div>
                   <button class="order-submit" type="button">Создать заказ</button>
                 </div>
               </div>
