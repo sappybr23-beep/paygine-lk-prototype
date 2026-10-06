@@ -328,13 +328,13 @@
   .order-seg b{color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .order-seg svg{color:var(--muted);flex-shrink:0;margin-left:auto}
 
-  .ofield{display:flex;align-items:center;gap:8px;background:var(--field);border-radius:4px;min-height:48px;padding:14px 16px;font-size:15px;line-height:20px;color:var(--muted)}
-  .ofield input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:inherit;font-size:15px;line-height:20px;color:var(--ink);letter-spacing:-.01em;padding:0}
+  .ofield{display:flex;align-items:center;gap:8px;background:var(--field);border-radius:12px;min-height:48px;padding:14px 16px;font-size:16px;line-height:20px;color:var(--muted)}
+  .ofield input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:inherit;font-size:16px;line-height:20px;color:var(--ink);letter-spacing:-.01em;padding:0}
   .ofield input::placeholder{color:var(--muted)}
   .ofield.select{justify-content:space-between;cursor:pointer;color:var(--muted)}
   .ofield.select .chev{color:var(--muted);flex-shrink:0;width:20px;height:20px}
 
-  .order-submit{display:flex;align-items:center;justify-content:center;background:var(--ink2);color:#fff;border:0;border-radius:4px;padding:16px 24px;font-family:inherit;font-size:15px;font-weight:600;line-height:16px;cursor:pointer}
+  .order-submit{display:flex;align-items:center;justify-content:center;background:var(--ink2);color:#fff;border:0;border-radius:12px;padding:14px 24px;font-family:inherit;font-size:16px;font-weight:600;line-height:20px;cursor:pointer}
   .order-submit:hover{opacity:.92}
 
   /* toggle */
@@ -351,13 +351,15 @@
   /* ---- empty state ---- */
   .order-empty{display:flex;flex-direction:column;gap:24px}
   .order-topwrap{max-width:608px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-  .oe-card{width:608px;max-width:100%;margin:0 auto;display:flex;flex-direction:column;gap:32px}
-  .oe-amount{display:flex;align-items:baseline;gap:10px;padding:40px 0;font-size:44px;font-weight:600;line-height:44px;letter-spacing:-.01em;color:var(--ink2)}
+  .oe-card{width:608px;max-width:100%;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  .oe-amount{display:flex;align-items:center;gap:10px;background:var(--field);border-radius:12px;padding:24px 16px;font-size:32px;font-weight:600;line-height:40px;letter-spacing:-.01em;color:var(--ink2)}
   .oe-amount-in{border:0;background:none;outline:none;font:inherit;letter-spacing:inherit;color:var(--ink2);padding:0;field-sizing:content;min-width:0;max-width:100%}
   .oe-amount-in::placeholder{color:var(--muted)}
   .oe-rub{flex-shrink:0;color:var(--ink2)}
   .oe-amount-in:placeholder-shown + .oe-rub{display:none}
   .oe-fields{display:flex;flex-direction:column;gap:16px}
+  .oe-reg{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 0}
+  .oe-reg-l{font-size:20px;font-weight:600;line-height:24px;color:var(--ink)}
   .order-empty .order-submit{width:608px;max-width:100%;margin:0 auto}
 
   /* ---- full state ---- */
@@ -1021,8 +1023,13 @@
             <div class="oe-card">
               <div class="oe-amount"><input class="oe-amount-in" type="text" size="12" placeholder="Сумма заказа" aria-label="Сумма заказа"><span class="oe-rub">₽</span></div>
               <div class="oe-fields">
-                <label class="ofield"><input type="text" placeholder="Номер заказа"></label>
+                <label class="ofield"><input type="text" placeholder="№ Заказа"></label>
                 <label class="ofield"><input type="text" placeholder="Описание"></label>
+                <label class="ofield"><input type="text" placeholder="Email для квитанции"></label>
+              </div>
+              <div class="oe-reg">
+                <span class="oe-reg-l">Регулярные платежи</span>
+                <button class="toggle" type="button" role="switch" aria-checked="false" aria-label="Регулярные платежи"></button>
               </div>
             </div>
             <button class="order-submit" type="button">Создать заказ</button>
